@@ -1,0 +1,130 @@
+<!--pages/list/list.wxml-->
+<view class="container">
+  <!-- 游客模式提示 -->
+  <view wx:if="{{isGuest}}" class="guest-tip">
+    <text class="guest-icon">👋</text>
+    <text class="guest-text">游客模式：点击任意功能登录使用</text>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input">
+      <icon type="search" size="16"></icon>
+      <input
+        placeholder="搜索发票号码、销售方..."
+        value="{{keyword}}"
+        bindconfirm="onSearch"
+        bindinput="onSearch"
+      />
+      <icon wx:if="{{keyword}}" type="clear" size="16" bindtap="onClearSearch"></icon>
+    </view>
+  </view>
+
+  <!-- 筛选器 -->
+  <view class="filters">
+    <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+      <view class="filter-item">
+        <text class="filter-label">开始日期</text>
+        <text class="filter-value {{startDate ? 'has-value' : ''}}">{{startDate || '选择日期'}}</text>
+      </view>
+    </picker>
+
+    <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+      <view class="filter-item">
+        <text class="filter-label">结束日期</text>
+        <text class="filter-value {{endDate ? 'has-value' : ''}}">{{endDate || '选择日期'}}</text>
+      </view>
+    </picker>
+
+    <picker mode="selector" range="{{types}}" range-key="label" value="{{typeIndex}}" bindchange="onTypeChange">
+      <view class="filter-item">
+        <text class="filter-label">发票类型</text>
+        <text class="filter-value {{typeIndex > 0 ? 'has-value' : ''}}">{{types[typeIndex].label}}</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 多选工具栏 -->
+  <view class="selection-toolbar">
+    <view class="toolbar-left">
+      <view class="select-all-wrapper" bindtap="toggleSelectAll">
+        <view class="custom-checkbox {{isAllSelected ? 'checked' : ''}}">
+          <text wx:if="{{isAllSelected}}" class="check-icon">✓</text>
+        </view>
+        <text class="select-all-text">全选</text>
+      </view>
+      <text class="selected-count">已选 {{selectedIds.length}} 张</text>
+    </view>
+    <view class="toolbar-right">
+      <button
+        wx:if="{{selectedIds.length > 0}}"
+        class="btn-generate"
+        bindtap="generateReimbursement"
+        type="primary"
+        size="mini"
+      >
+        生成报销包
+      </button>
+      <button
+        wx:if="{{selectedIds.length > 0}}"
+        class="btn-cancel"
+        bindtap="cancelSelection"
+        size="mini"
+      >
+        取消选择
+      </button>
+    </view>
+  </view>
+
+  <!-- 发票列表 -->
+  <view class="invoice-list">
+    <view wx:if="{{invoices.length > 0}}">
+      <view
+        class="invoice-item"
+        wx:for="{{invoices}}"
+        wx:key="id"
+        bindtap="onSelectInvoice"
+        data-id="{{item.id}}"
+      >
+        <!-- 复选框 -->
+        <view class="invoice-checkbox">
+          <view class="checkbox-wrapper {{selectedMap[item.id] ? 'checked' : ''}}">
+            <text wx:if="{{selectedMap[item.id]}}" class="check-icon">✓</text>
+          </view>
+        </view>
+
+        <!-- 发票内容 -->
+        <view class="invoice-main">
+          <view class="invoice-left">
+            <view class="invoice-type-tag">{{item.invoice_type || '电子发票'}}</view>
+            <view class="invoice-info">
+              <text class="invoice-seller">{{item.seller_name || '未知'}}</text>
+              <text class="invoice-number">{{item.invoice_number}}</text>
+            </view>
+            <text class="invoice-date">{{item.invoice_date}}</text>
+          </view>
+          <view class="invoice-right">
+            <text class="invoice-amount">¥{{item.total_amount || '0.00'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view wx:if="{{loading}}" class="loading">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 没有更多 -->
+    <view wx:if="{{!hasMore && invoices.length > 0}}" class="no-more">
+      <text>没有更多发票了</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{!loading && invoices.length === 0}}" class="empty-state">
+      <text class="empty-icon">📄</text>
+      <text class="empty-text">暂无发票</text>
+      <text class="empty-hint">请先在设置中配置邮箱</text>
+    </view>
+  </view>
+</view>

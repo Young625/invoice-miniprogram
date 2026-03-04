@@ -1,0 +1,232 @@
+/* pages/reimbursement/reimbursement.wxss - 与整体风格统一 */
+page {
+  background: linear-gradient(165deg, #F0F4FF 0%, #EEF2F7 40%, #F2F4F8 100%);
+}
+
+.container {
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+.header {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 50%, #1D4ED8 100%);
+  padding: 28px 20px 24px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.title {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.header-desc {
+  display: block;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.section {
+  margin: 0 16px 16px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  position: relative;
+  line-height: 1.4;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 14px;
+  background: #2563EB;
+  border-radius: 2px;
+}
+
+.info-card {
+  background: linear-gradient(145deg, #F8FAFC 0%, #F2F4F8 100%);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+  padding: 4px 0;
+}
+
+.info-row:last-child {
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
+  margin-top: 4px;
+  padding-top: 12px;
+}
+
+.info-label {
+  font-size: 14px;
+  color: #64748B;
+}
+
+.info-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.info-value.amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2563EB;
+}
+
+.content-list {
+  background: linear-gradient(150deg, #F8FAFC 0%, #F2F4F8 50%, #F5F7FA 100%);
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.content-item {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.content-item:last-child {
+  border-bottom: none;
+}
+
+.content-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-right: 12px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.content-text {
+  font-size: 15px;
+  color: #1E293B;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.form {
+  background: linear-gradient(150deg, #F8FAFC 0%, #F2F4F8 100%);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.form-item {
+  margin-bottom: 16px;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  color: #1E293B;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.input-placeholder {
+  font-size: 14px;
+  color: #94A3B8;
+}
+
+.form-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  line-height: 44px;
+  background: linear-gradient(145deg, #F5F7FA 0%, #EEF2F7 100%);
+  border-radius: 10px;
+  font-size: 15px;
+  color: #1E293B;
+  box-sizing: border-box;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.form-textarea {
+  width: 100%;
+  height: 80px;
+  padding: 12px 14px;
+  background: linear-gradient(145deg, #F5F7FA 0%, #EEF2F7 100%);
+  border-radius: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1E293B;
+  box-sizing: border-box;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.action-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, #F8FAFC 0%, #F2F4F8 100%);
+  padding: 16px 16px 32px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  z-index: 100;
+}
+
+.btn-generate {
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: #FFFFFF;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-generate::after {
+  border: none;
+}
+
+.hint {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.hint text {
+  font-size: 12px;
+  color: #94A3B8;
+  line-height: 1.5;
+}

@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Environment variables
+.env
+.env.local
+
+# MongoDB
+backend/mongodb/
+backend/mongodb-data/
+*.tgz
+
+# Logs
+*.log
+logs/
+backend/backend.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# WeChat MiniProgram
+miniprogram/node_modules/
+
+# Temporary files
+*.tmp
+*.bak
+
+# Windows reserved names
+nul
+NUL

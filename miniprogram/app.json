@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/login",
+    "pages/agreement/agreement",
+    "pages/list/list",
+    "pages/detail/detail",
+    "pages/settings/settings",
+    "pages/reimbursement/reimbursement"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#2563EB",
+    "navigationBarTitleText": "发票管家",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F0F2F5"
+  },
+  "tabBar": {
+    "color": "#969799",
+    "selectedColor": "#2563EB",
+    "backgroundColor": "#F5F6F8",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/list/list",
+        "text": "发票",
+        "iconPath": "images/invoice.png",
+        "selectedIconPath": "images/invoice-active.png"
+      },
+      {
+        "pagePath": "pages/settings/settings",
+        "text": "设置",
+        "iconPath": "images/settings.png",
+        "selectedIconPath": "images/settings-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

@@ -1,0 +1,401 @@
+/* pages/list/list.wxss - 简约风格，与登录页统一 */
+page {
+  background: linear-gradient(165deg, #F0F4FF 0%, #EEF2F7 35%, #F2F4F8 70%, #F0F2F5 100%);
+}
+
+.container {
+  min-height: 100vh;
+  padding-bottom: 24px;
+  box-sizing: border-box;
+}
+
+/* 游客模式提示 */
+.guest-tip {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  margin: 12px 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.guest-icon {
+  font-size: 24px;
+  margin-right: 8px;
+}
+
+.guest-text {
+  font-size: 13px;
+  color: #92400E;
+  font-weight: 600;
+}
+
+/* 搜索栏 */
+.search-bar {
+  background: linear-gradient(180deg, #F8FAFC 0%, #F2F4F8 100%);
+  padding: 12px 16px 10px;
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(145deg, #F5F7FA 0%, #EEF2F7 100%);
+  border-radius: 12px;
+  padding: 10px 14px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  transition: all 0.2s;
+}
+
+.search-input:focus-within {
+  background: linear-gradient(145deg, #FAFBFC 0%, #F4F6F9 100%);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.search-input icon {
+  margin-right: 8px;
+  color: #94A3B8;
+}
+
+.search-input input {
+  flex: 1;
+  font-size: 15px;
+  color: #1E293B;
+}
+
+.search-input input::placeholder {
+  color: #94A3B8;
+}
+
+/* 筛选器 */
+.filters {
+  display: flex;
+  gap: 10px;
+  padding: 0 16px 14px;
+  background: linear-gradient(180deg, #F8FAFC 0%, #F2F4F8 100%);
+}
+
+.filter-item {
+  flex: 1;
+  padding: 12px 10px;
+  background: linear-gradient(145deg, #F5F7FA 0%, #EEF2F7 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.filter-item:active {
+  background: linear-gradient(145deg, #EEF2F7 0%, #E2E8F0 100%);
+}
+
+.filter-label {
+  display: block;
+  font-size: 11px;
+  color: #94A3B8;
+  margin-bottom: 4px;
+  letter-spacing: 0.2px;
+}
+
+.filter-value {
+  display: block;
+  font-size: 13px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.filter-value.has-value {
+  color: #1E293B;
+}
+
+/* 多选工具栏 */
+.selection-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  background: linear-gradient(145deg, #F8FAFC 0%, #F2F4F8 100%);
+  padding: 10px 14px;
+  margin: 0 16px 14px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.select-all-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.select-all-wrapper:active {
+  opacity: 0.8;
+}
+
+.custom-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #CBD5E1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #F8FAFC 0%, #F2F4F8 100%);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.custom-checkbox.checked {
+  background: #2563EB;
+  border-color: #2563EB;
+}
+
+.select-all-text {
+  font-size: 14px;
+  color: #1E293B;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.selected-count {
+  font-size: 13px;
+  color: #2563EB;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-generate {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+  color: #FFFFFF !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 12px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-generate::after {
+  border: none;
+}
+
+.btn-generate:active {
+  background: #1D4ED8 !important;
+}
+
+.btn-cancel {
+  background: linear-gradient(145deg, #F2F4F8 0%, #EEF2F7 100%) !important;
+  color: #64748B !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  border: none !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 10px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-cancel::after {
+  border: none;
+}
+
+.btn-cancel:active {
+  opacity: 0.9;
+}
+
+.btn-cancel:active {
+  background: #E2E8F0 !important;
+}
+
+/* 发票列表 */
+.invoice-list {
+  padding: 0 16px;
+}
+
+.invoice-item {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F2F4F8 50%, #F5F7FA 100%);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.2s;
+}
+
+.invoice-item:active {
+  background: linear-gradient(135deg, #F4F6F9 0%, #EEF2F7 100%);
+}
+
+.invoice-item.selected {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.15);
+}
+
+.invoice-checkbox {
+  margin-right: 14px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.checkbox-wrapper {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #CBD5E1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #F8FAFC 0%, #F2F4F8 100%);
+  transition: all 0.2s;
+}
+
+.checkbox-wrapper.checked {
+  background: #2563EB;
+  border-color: #2563EB;
+}
+
+.check-icon {
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.invoice-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.invoice-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.invoice-type-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #EFF6FF;
+  color: #2563EB;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  letter-spacing: 0.2px;
+}
+
+.invoice-info {
+  margin-bottom: 6px;
+}
+
+.invoice-seller {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invoice-number {
+  display: block;
+  font-size: 12px;
+  color: #64748B;
+  font-family: ui-monospace, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invoice-date {
+  display: block;
+  font-size: 12px;
+  color: #94A3B8;
+  margin-top: 4px;
+}
+
+.invoice-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.invoice-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2563EB;
+  letter-spacing: 0.3px;
+}
+
+/* 加载 / 没有更多 */
+.loading,
+.no-more {
+  text-align: center;
+  padding: 24px;
+  color: #94A3B8;
+  font-size: 14px;
+}
+
+.no-more {
+  padding: 16px;
+  font-size: 13px;
+}
+
+/* 空状态 */
+.empty-state {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.empty-icon {
+  display: block;
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-text {
+  display: block;
+  font-size: 16px;
+  color: #64748B;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.empty-hint {
+  display: block;
+  font-size: 14px;
+  color: #94A3B8;
+  line-height: 1.5;
+}

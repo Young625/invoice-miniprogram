@@ -1,0 +1,95 @@
+<!--pages/reimbursement/reimbursement.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">生成报销包</text>
+    <text class="header-desc">确认信息后生成并分享</text>
+  </view>
+
+  <!-- 已选发票 -->
+  <view class="section">
+    <view class="section-title">已选发票</view>
+    <view class="info-card">
+      <view class="info-row">
+        <text class="info-label">发票数量：</text>
+        <text class="info-value">{{invoices.length}} 张</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">总金额：</text>
+        <text class="info-value amount">¥{{totalAmount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 包含内容 -->
+  <view class="section">
+    <view class="section-title">包含内容</view>
+    <view class="content-list">
+      <view class="content-item">
+        <view class="content-icon">📊</view>
+        <text class="content-text">发票汇总表（Excel）</text>
+      </view>
+      <view class="content-item">
+        <view class="content-icon">📄</view>
+        <text class="content-text">报销单（PDF）</text>
+      </view>
+      <view class="content-item">
+        <view class="content-icon">📦</view>
+        <text class="content-text">发票原件（PDF打包）</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 报销单信息 -->
+  <view class="section">
+    <view class="section-title">报销单信息</view>
+    <view class="form">
+      <view class="form-item">
+        <text class="form-label">报销人</text>
+        <input
+          class="form-input"
+          placeholder-class="input-placeholder"
+          placeholder="请输入报销人姓名"
+          value="{{name}}"
+          bindinput="onNameInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">部门</text>
+        <input
+          class="form-input"
+          placeholder-class="input-placeholder"
+          placeholder="请输入部门"
+          value="{{department}}"
+          bindinput="onDepartmentInput"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">报销事由</text>
+        <textarea
+          class="form-textarea"
+          placeholder-class="input-placeholder"
+          placeholder="选填，如：差旅费、办公用品"
+          value="{{reason}}"
+          bindinput="onReasonInput"
+          maxlength="200"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 生成按钮 -->
+  <view class="action-section">
+    <button
+      class="btn-generate"
+      type="primary"
+      bindtap="generatePackage"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+    >
+      {{loading ? '生成中...' : '生成并分享'}}
+    </button>
+    <view class="hint">
+      <text>生成后可选择分享到微信或保存到收藏</text>
+    </view>
+  </view>
+</view>

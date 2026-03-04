@@ -1,0 +1,86 @@
+<!--pages/index/index.wxml-->
+<view class="page-wrap">
+  <view class="container">
+    <!-- 游客模式提示 -->
+    <view wx:if="{{isGuest}}" class="guest-tip">
+      <text class="guest-icon">👋</text>
+      <text class="guest-text">欢迎体验贴票侠</text>
+    </view>
+
+    <!-- 统计卡片 -->
+    <view class="stats-section">
+      <view class="stats-card">
+      <view class="stats-row">
+        <view class="stat-item">
+          <text class="stat-value">{{stats.month_count || 0}}</text>
+          <text class="stat-label">本月发票</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="stat-value">¥{{stats.month_amount != null ? stats.month_amount : '0.00'}}</text>
+          <text class="stat-label">本月金额</text>
+        </view>
+      </view>
+      <view class="stats-row mt-16">
+        <view class="stat-item">
+          <text class="stat-value-small">{{stats.total_count || 0}}</text>
+          <text class="stat-label">累计发票</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="stat-value-small">¥{{stats.total_amount != null ? stats.total_amount : '0.00'}}</text>
+          <text class="stat-label">累计金额</text>
+        </view>
+      </view>
+      </view>
+    </view>
+
+    <!-- 快速操作 -->
+  <view class="action-section">
+    <view class="action-btn" bindtap="syncInvoices">
+      <text class="action-icon">🔄</text>
+      <text class="action-text">同步发票</text>
+    </view>
+    <view class="action-btn" bindtap="viewAllInvoices">
+      <text class="action-icon">📋</text>
+      <text class="action-text">全部发票</text>
+    </view>
+    </view>
+
+    <!-- 最近发票 -->
+    <view class="recent-section">
+    <view class="section-header">
+      <text class="section-title">最近发票</text>
+      <text class="section-more" bindtap="viewAllInvoices">查看全部 ></text>
+    </view>
+
+    <view wx:if="{{recentInvoices.length > 0}}">
+      <view
+        class="invoice-card"
+        wx:for="{{recentInvoices}}"
+        wx:key="id"
+        bindtap="viewInvoiceDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="invoice-header">
+          <text class="invoice-type">{{item.invoice_type || '电子发票'}}</text>
+          <text class="invoice-amount text-primary">¥{{item.total_amount || '0.00'}}</text>
+        </view>
+        <view class="invoice-body">
+          <text class="invoice-seller">{{item.seller_name || '未知'}}</text>
+          <text class="invoice-date text-secondary">{{item.invoice_date || ''}}</text>
+        </view>
+        <view class="invoice-footer">
+          <text class="invoice-number text-secondary">{{item.invoice_number || ''}}</text>
+        </view>
+      </view>
+    </view>
+
+      <view wx:else class="empty-state">
+        <text class="empty-icon">📄</text>
+        <text class="empty-text">暂无发票</text>
+        <text class="empty-hint">点击上方"同步发票"获取最新发票</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,319 @@
+/* pages/index/index.wxss */
+.page-wrap {
+  height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(165deg, #F0F4FF 0%, #EEF2F7 40%, #F2F4F8 100%);
+}
+
+.container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 游客模式提示 */
+.guest-tip {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.guest-icon {
+  display: block;
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.guest-text {
+  display: block;
+  font-size: 14px;
+  color: #92400E;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.guest-login-btn {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 24px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.stats-section {
+  flex-shrink: 0;
+  margin-bottom: 16px;
+}
+
+.stats-card {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 50%, #1D4ED8 100%);
+  border-radius: 12px;
+  padding: 20px;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.stat-value-small {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 快速操作 */
+.action-section {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  background: linear-gradient(145deg, #F8FAFC 0%, #F2F4F8 100%);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  transition: all 0.2s ease;
+}
+
+.action-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+.action-icon {
+  display: block;
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.action-text {
+  display: block;
+  font-size: 14px;
+  color: #1E293B;
+  font-weight: 500;
+}
+
+/* 最近发票 */
+.recent-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(150deg, #F8FAFC 0%, #F2F4F8 50%, #F5F7FA 100%);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  overflow: hidden;
+}
+
+.recent-section .section-header {
+  flex-shrink: 0;
+}
+
+.recent-section > view:last-child {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1E293B;
+  position: relative;
+  padding-left: 12px;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 16px;
+  background: #2563EB;
+  border-radius: 2px;
+}
+
+.section-more {
+  font-size: 13px;
+  color: #2563EB;
+  font-weight: 500;
+}
+
+/* 发票卡片 */
+.invoice-card {
+  background: linear-gradient(135deg, #FAFBFC 0%, #F4F6F9 100%);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.2s ease;
+}
+
+.invoice-card:last-child {
+  margin-bottom: 0;
+}
+
+.invoice-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.invoice-type {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+.invoice-amount {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2563EB;
+}
+
+.invoice-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 8px 0;
+  border-top: 1px dashed #E2E8F0;
+}
+
+.invoice-seller {
+  font-size: 14px;
+  color: #1E293B;
+  font-weight: 500;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invoice-date {
+  font-size: 12px;
+  color: #64748B;
+  background: linear-gradient(135deg, #F2F4F8 0%, #EEF2F7 100%);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.invoice-footer {
+  margin-top: 4px;
+}
+
+.invoice-number {
+  font-size: 11px;
+  color: #94A3B8;
+  font-family: ui-monospace, monospace;
+}
+
+/* 空状态 */
+.empty-state {
+  padding: 60px 0;
+  text-align: center;
+}
+
+.empty-icon {
+  display: block;
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.empty-text {
+  display: block;
+  font-size: 16px;
+  color: #64748B;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.empty-hint {
+  display: block;
+  font-size: 13px;
+  color: #94A3B8;
+  line-height: 1.6;
+}

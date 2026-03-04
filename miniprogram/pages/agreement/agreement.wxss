@@ -1,0 +1,37 @@
+/* pages/agreement/agreement.wxss */
+page {
+  background: linear-gradient(165deg, #F0F4FF 0%, #EEF2F7 100%);
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.scroll-content {
+  flex: 1;
+  width: 100%;
+  max-width: 680px;
+  min-height: 0;
+  background: linear-gradient(145deg, #F8FAFC 0%, #F2F4F8 100%);
+  border-radius: 14px;
+  padding: 24px 20px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-sizing: border-box;
+}
+
+.content-text {
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  color: #1E293B;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+  box-sizing: border-box;
+}

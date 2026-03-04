@@ -1,0 +1,342 @@
+/* pages/login/login.wxss - 动态与创新：渐变动效、入场动画、浮动光晕 */
+.login-container {
+  height: 100vh;
+  background: linear-gradient(160deg, #E0E7FF 0%, #C7D2FE 20%, #E8EEFA 45%, #EEF2FF 70%, #F0F4FF 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease infinite;
+  padding: 48px 24px 32px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 背景渐变缓慢流动 */
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 左上角光晕 - 缓慢浮动 */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: -80px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(37, 99, 235, 0.08) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: floatOrb 15s ease-in-out infinite;
+}
+
+/* 右下角光晕 - 反向浮动 */
+.login-container::after {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  right: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: floatOrb 18s ease-in-out infinite reverse;
+}
+
+@keyframes floatOrb {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.9; }
+  33% { transform: translate(20px, -15px) scale(1.05); opacity: 1; }
+  66% { transform: translate(-15px, 20px) scale(0.95); opacity: 0.85; }
+}
+
+/* 头部 - 入场动画 */
+.login-header {
+  flex-shrink: 0;
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 品牌名 - 渐变字 + 轻微光感 */
+.app-name {
+  display: block;
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: nameShine 4s ease-in-out infinite;
+}
+
+@keyframes nameShine {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.08); }
+}
+
+.app-desc {
+  display: block;
+  font-size: 15px;
+  color: #475569;
+  margin-bottom: 4px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #64748B;
+  letter-spacing: 0.3px;
+}
+
+.login-content {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 功能卡片容器 - 玻璃拟态 + 入场 */
+.feature-list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  background: linear-gradient(150deg, rgba(255,255,255,0.75) 0%, rgba(248,250,252,0.9) 50%, rgba(241,245,249,0.85) 100%);
+  border-radius: 24px;
+  padding: 20px 20px;
+  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.12), 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid rgba(255,255,255,0.6);
+  animation: cardReveal 0.6s ease-out 0.2s both;
+}
+
+@keyframes cardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 每个功能项 - 错峰入场 + 轻微悬浮感 */
+.feature-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.8);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  animation: itemSlideIn 0.5s ease-out both;
+}
+
+.feature-item:nth-child(1) { animation-delay: 0.35s; }
+.feature-item:nth-child(2) { animation-delay: 0.45s; }
+.feature-item:nth-child(3) { animation-delay: 0.55s; }
+.feature-item:nth-child(4) { animation-delay: 0.65s; }
+
+@keyframes itemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.feature-item:last-child {
+  margin-bottom: 0;
+}
+
+.feature-item:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, rgba(241,245,249,0.98) 0%, rgba(226,232,240,0.95) 100%);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* 图标区 - 渐变 + 微动 */
+.feature-icon-wrapper {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 50%, #A5B4FC 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+  animation: iconPulse 3s ease-in-out infinite;
+}
+
+.feature-item:nth-child(1) .feature-icon-wrapper { animation-delay: 0s; }
+.feature-item:nth-child(2) .feature-icon-wrapper { animation-delay: 0.3s; }
+.feature-item:nth-child(3) .feature-icon-wrapper { animation-delay: 0.6s; }
+.feature-item:nth-child(4) .feature-icon-wrapper { animation-delay: 0.9s; }
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25); }
+  50% { transform: scale(1.03); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35); }
+}
+
+.feature-icon {
+  font-size: 26px;
+}
+
+.feature-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.feature-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 2px;
+  letter-spacing: 0.2px;
+}
+
+.feature-desc {
+  font-size: 12px;
+  color: #64748B;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+}
+
+.login-footer {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 隐私协议勾选区域 */
+.privacy-agreement {
+  margin-bottom: 16px;
+}
+
+.privacy-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #64748B;
+  line-height: 1.5;
+}
+
+.privacy-text {
+  color: #64748B;
+  margin: 0 2px;
+}
+
+.privacy-link {
+  color: #4F46E5;
+  font-weight: 600;
+  margin: 0 2px;
+}
+
+checkbox {
+  margin-right: 6px;
+}
+
+/* 登录按钮 - 渐变 + 呼吸光晕 */
+.login-btn {
+  background: linear-gradient(135deg, #4F46E5 0%, #2563EB 50%, #1D4ED8 100%);
+  background-size: 200% 200%;
+  animation: btnGlow 4s ease-in-out infinite;
+  color: #FFFFFF;
+  border-radius: 16px;
+  height: 54px;
+  line-height: 54px;
+  font-size: 17px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.5px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+}
+
+/* 禁用状态 */
+.login-btn[disabled] {
+  background: linear-gradient(135deg, #94A3B8 0%, #CBD5E1 100%);
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.3);
+  animation: none;
+  opacity: 0.6;
+}
+
+@keyframes btnGlow {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+    background-position: 0% 50%;
+  }
+  50% {
+    box-shadow: 0 8px 28px rgba(79, 70, 229, 0.5);
+    background-position: 100% 50%;
+  }
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45);
+}
+
+.login-tips {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 12px;
+  color: #64748B;
+  line-height: 1.5;
+}
+
+.link {
+  color: #4F46E5;
+  text-decoration: none;
+  font-weight: 600;
+}

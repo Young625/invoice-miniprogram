@@ -1,0 +1,274 @@
+<!--pages/settings/settings.wxml-->
+<view class="container">
+  <!-- 游客模式提示 -->
+  <view wx:if="{{isGuest}}" class="guest-tip">
+    <text class="guest-icon">👋</text>
+    <text class="guest-text">游客模式：点击任意功能登录使用</text>
+  </view>
+
+  <!-- 用户信息 -->
+  <view class="user-section" bindtap="editUserInfo">
+    <view class="avatar-container">
+      <image class="avatar" src="{{userInfo.avatar_url || '/images/default-avatar.png'}}"></image>
+      <view class="edit-badge">编辑</view>
+    </view>
+    <view class="user-info">
+      <text class="nickname">{{userInfo.nickname || '未登录'}}</text>
+      <!-- 已绑定邮箱 -->
+      <view wx:if="{{emailConfigs.length > 0}}" class="email-badges">
+        <view wx:for="{{emailConfigs}}" wx:key="index" class="email-badge">
+          <text class="email-badge-text">📧 {{item.username}}</text>
+        </view>
+      </view>
+      <view wx:else>
+        <text class="email">{{isGuest ? '登录后绑定邮箱' : '点击下方绑定邮箱'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 邮箱配置 -->
+  <view class="section">
+    <view class="section-title">
+      <text>邮箱配置</text>
+      <text class="section-subtitle">（{{emailConfigs.length}}/{{maxEmailConfigs}}）</text>
+    </view>
+
+    <!-- 邮箱配置列表 -->
+    <view wx:for="{{emailConfigs}}" wx:key="index" class="email-item">
+      <view class="email-item-left">
+        <view class="config-icon">📧</view>
+        <view class="config-info">
+          <view class="config-title-row">
+            <text class="config-title">{{item.username}}</text>
+            <text wx:if="{{index === 0}}" class="primary-badge">主邮箱</text>
+          </view>
+          <text class="config-desc">{{item.imap_server}}:{{item.imap_port}}</text>
+        </view>
+      </view>
+      <view class="email-item-actions">
+        <text wx:if="{{index !== 0}}" class="action-btn primary" bindtap="setPrimaryEmail" data-index="{{index}}">设为主邮箱</text>
+        <text class="action-btn edit" bindtap="showEditEmailModal" data-index="{{index}}">编辑</text>
+        <text class="action-btn delete" bindtap="deleteEmailConfig" data-index="{{index}}">删除</text>
+      </view>
+    </view>
+
+    <!-- 添加邮箱按钮 -->
+    <view wx:if="{{emailConfigs.length < maxEmailConfigs}}" class="add-email-btn" bindtap="showAddEmailModal">
+      <text class="add-icon">+</text>
+      <text>添加邮箱配置</text>
+    </view>
+
+    <!-- 同步按钮 -->
+    <view wx:if="{{emailConfigs.length > 0}}" class="sync-btn" bindtap="syncInvoices">
+      <text>立即同步发票</text>
+    </view>
+  </view>
+
+  <!-- 通知设置 -->
+  <view class="section">
+    <view class="section-title">通知设置</view>
+    <view class="setting-item">
+      <view class="setting-left">
+        <text class="setting-icon">🔔</text>
+        <text class="setting-text">新发票提醒</text>
+      </view>
+      <switch
+        checked="{{notifications.newInvoice}}"
+        data-key="newInvoice"
+        bindchange="toggleNotification"
+        color="#2563EB"
+      />
+    </view>
+    <view class="setting-item">
+      <view class="setting-left">
+        <text class="setting-icon">📊</text>
+        <text class="setting-text">每月汇总</text>
+      </view>
+      <switch
+        checked="{{notifications.monthlySummary}}"
+        data-key="monthlySummary"
+        bindchange="toggleNotification"
+        color="#2563EB"
+      />
+    </view>
+  </view>
+
+  <!-- 其他设置 -->
+  <view class="section">
+    <view class="section-title">其他</view>
+    <view class="setting-item" bindtap="showAbout">
+      <view class="setting-left">
+        <text class="setting-icon">ℹ️</text>
+        <text class="setting-text">关于我们</text>
+      </view>
+      <text class="setting-arrow">></text>
+    </view>
+    <view class="setting-item" bindtap="logout">
+      <view class="setting-left">
+        <text class="setting-icon">🚪</text>
+        <text class="setting-text">退出登录</text>
+      </view>
+      <text class="setting-arrow">></text>
+    </view>
+  </view>
+</view>
+
+<!-- 编辑用户信息弹窗 -->
+<view wx:if="{{showUserInfoModal}}" class="modal-mask">
+  <view class="modal-content user-info-modal">
+    <view class="modal-header">
+      <text class="modal-title">编辑个人信息</text>
+      <text class="modal-close" bindtap="hideUserInfoModal">×</text>
+    </view>
+
+    <view class="modal-body">
+      <view class="form-item avatar-form-item">
+        <text class="form-label">头像</text>
+        <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image class="avatar-preview" src="{{tempUserInfo.avatar_url}}"></image>
+          <text class="avatar-picker-tip">点击更换</text>
+        </button>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">昵称</text>
+        <input
+          class="form-input"
+          type="nickname"
+          placeholder="请输入昵称"
+          value="{{tempUserInfo.nickname}}"
+          bindinput="onNicknameChange"
+        />
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="modal-btn cancel" bindtap="hideUserInfoModal">取消</button>
+      <button class="modal-btn confirm" bindtap="saveUserInfo">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- 邮箱配置弹窗 -->
+<view wx:if="{{showEmailModal}}" class="modal-mask">
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">{{editingIndex === -1 ? '添加邮箱' : '编辑邮箱'}}</text>
+      <text class="modal-close" bindtap="hideEmailConfigModal">×</text>
+    </view>
+
+    <view class="modal-body">
+      <view class="form-item">
+        <text class="form-label">邮箱类型 *</text>
+        <picker
+          class="form-picker"
+          mode="selector"
+          range="{{emailProviders}}"
+          range-key="label"
+          value="{{emailForm.email_type_index}}"
+          bindchange="onEmailTypeChange"
+        >
+          <view class="picker-value">
+            {{currentProvider.name}}
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 自定义邮箱配置 -->
+      <view wx:if="{{emailForm.email_type === 'custom'}}" class="custom-config">
+        <view class="form-item">
+          <text class="form-label">IMAP服务器 *</text>
+          <input
+            class="form-input"
+            placeholder-class="input-placeholder"
+            placeholder="例：imap.company.com"
+            value="{{emailForm.custom_imap_server}}"
+            data-field="custom_imap_server"
+            bindinput="onInputChange"
+          />
+        </view>
+
+        <view class="form-item">
+          <text class="form-label">IMAP端口 *</text>
+          <input
+            class="form-input"
+            type="number"
+            placeholder-class="input-placeholder"
+            placeholder="默认：993"
+            value="{{emailForm.custom_imap_port}}"
+            data-field="custom_imap_port"
+            bindinput="onInputChange"
+          />
+        </view>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">邮箱账号 *</text>
+        <input
+          class="form-input"
+          placeholder-class="input-placeholder"
+          placeholder="{{currentProvider.placeholder}}"
+          value="{{emailForm.username}}"
+          data-field="username"
+          bindinput="onInputChange"
+        />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label-row">
+          <text class="form-label">授权码 *</text>
+          <text class="help-link" bindtap="showAuthCodeHelp">如何找到授权码</text>
+        </view>
+        <input
+          class="form-input"
+          password
+          placeholder-class="input-placeholder"
+          placeholder="授权码（非登录密码）"
+          value="{{emailForm.auth_code}}"
+          data-field="auth_code"
+          bindinput="onInputChange"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">邮件文件夹</text>
+        <input
+          class="form-input"
+          placeholder-class="input-placeholder"
+          placeholder="默认：INBOX"
+          value="{{emailForm.folder}}"
+          data-field="folder"
+          bindinput="onInputChange"
+        />
+      </view>
+
+      <view class="form-tips">
+        <text>* 为必填项</text>
+        <text>授权码请在邮箱设置中获取</text>
+        <text wx:if="{{emailForm.email_type !== 'custom'}}">IMAP服务器: {{currentProvider.imap_server}}:{{currentProvider.imap_port}}</text>
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="modal-btn cancel" bindtap="hideEmailConfigModal">取消</button>
+      <button class="modal-btn confirm" bindtap="saveEmailConfig">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- 授权码帮助弹窗 -->
+<view wx:if="{{showAuthCodeHelp}}" class="modal-mask" bindtap="hideAuthCodeHelp">
+  <view class="help-modal" catchtap="">
+    <view class="help-header">
+      <text class="help-title">如何获取{{currentProvider.name}}授权码？</text>
+      <text class="modal-close" bindtap="hideAuthCodeHelp">×</text>
+    </view>
+    <view class="help-content">
+      <text class="help-text">{{currentProvider.authCodeHelp}}</text>
+    </view>
+    <view class="help-footer">
+      <button class="help-btn" bindtap="hideAuthCodeHelp">知道了</button>
+    </view>
+  </view>
+</view>

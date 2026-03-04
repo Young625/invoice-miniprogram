@@ -1,0 +1,68 @@
+<!--pages/login/login.wxml-->
+<view class="login-container">
+  <view class="login-header">
+    <text class="app-name">贴票侠</text>
+    <text class="app-desc">智能发票管理专家</text>
+    <view class="subtitle">让报销变得简单高效</view>
+  </view>
+
+  <view class="login-content">
+    <view class="feature-list">
+      <view class="feature-item">
+        <view class="feature-icon-wrapper">
+          <text class="feature-icon">📧</text>
+        </view>
+        <view class="feature-content">
+          <text class="feature-title">自动提取</text>
+          <text class="feature-desc">邮箱发票智能识别</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrapper">
+          <text class="feature-icon">📊</text>
+        </view>
+        <view class="feature-content">
+          <text class="feature-title">智能分析</text>
+          <text class="feature-desc">数据统计一目了然</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrapper">
+          <text class="feature-icon">📁</text>
+        </view>
+        <view class="feature-content">
+          <text class="feature-title">分类管理</text>
+          <text class="feature-desc">发票归档井井有条</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon-wrapper">
+          <text class="feature-icon">🚀</text>
+        </view>
+        <view class="feature-content">
+          <text class="feature-title">快速导出</text>
+          <text class="feature-desc">一键生成报销包</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="login-footer">
+    <!-- 隐私政策勾选框 -->
+    <view class="privacy-agreement">
+      <checkbox-group bindchange="onPrivacyChange">
+        <label class="privacy-label">
+          <checkbox value="agreed" checked="{{privacyAgreed}}" color="#2563EB"/>
+          <text class="privacy-text">我已阅读并同意</text>
+          <text class="privacy-link" bindtap="viewUserAgreement">《用户协议》</text>
+          <text class="privacy-text">和</text>
+          <text class="privacy-link" bindtap="viewPrivacyPolicy">《隐私政策》</text>
+        </label>
+      </checkbox-group>
+    </view>
+
+    <button class="login-btn" bindtap="handleLogin" disabled="{{!privacyAgreed}}">
+      <text>微信一键登录</text>
+    </button>
+  </view>
+</view>
