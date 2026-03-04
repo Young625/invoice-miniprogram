@@ -1,0 +1,61 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-info:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check PR title
+      run: |
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        # 检查 PR 标题是否符合规范 (feat:, fix:, docs:, etc.)
+        if echo "$PR_TITLE" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf)(\(.+\))?:"; then
+          echo "✓ PR title follows conventional commits format"
+        else
+          echo "⚠ PR title should follow format: type(scope): description"
+          echo "  Examples: feat: add new feature, fix: resolve bug"
+        fi
+
+    - name: Check for CHANGELOG update
+      run: |
+        if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "CHANGELOG.md"; then
+          echo "✓ CHANGELOG.md has been updated"
+        else
+          echo "⚠ Consider updating CHANGELOG.md"
+        fi
+
+    - name: Count changed files
+      run: |
+        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)
+        echo "Changed files: $CHANGED_FILES"
+        if [ $CHANGED_FILES -gt 50 ]; then
+          echo "⚠ This PR changes many files ($CHANGED_FILES). Consider splitting it."
+        fi
+
+    - name: Check for large additions
+      run: |
+        ADDITIONS=$(git diff --shortstat origin/${{ github.base_ref }}...HEAD | grep -oP '\d+(?= insertion)')
+        if [ ! -z "$ADDITIONS" ] && [ $ADDITIONS -gt 1000 ]; then
+          echo "⚠ This PR adds many lines ($ADDITIONS). Consider splitting it."
+        fi
+
+  label-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Auto-label PR
+      uses: actions/labeler@v5
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}

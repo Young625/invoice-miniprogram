@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- 待添加的新功能
+- GitHub Actions 自动化工作流
+  - 后端 CI/CD 流程（测试、代码检查）
+  - 代码质量检查流程
+  - 自动发布流程
+  - PR 自动检查流程
+- Markdown 代码规范配置
 
 ### Changed
 - 待修改的功能
