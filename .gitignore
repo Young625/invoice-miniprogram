@@ -60,3 +60,6 @@ miniprogram/node_modules/
 # Windows reserved names
 nul
 NUL
+
+# Generated data files
+data/
