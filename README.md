@@ -1,5 +1,11 @@
 # 发票管理小程序
 
+[![Backend CI](https://github.com/Young625/invoice-miniprogram/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Young625/invoice-miniprogram/actions/workflows/backend-ci.yml)
+[![Code Quality](https://github.com/Young625/invoice-miniprogram/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Young625/invoice-miniprogram/actions/workflows/code-quality.yml)
+[![Release](https://github.com/Young625/invoice-miniprogram/actions/workflows/release.yml/badge.svg)](https://github.com/Young625/invoice-miniprogram/actions/workflows/release.yml)
+[![GitHub release](https://img.shields.io/github/v/release/Young625/invoice-miniprogram)](https://github.com/Young625/invoice-miniprogram/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 完整的发票管理小程序，包含前端和后端。
 
 ## 项目结构

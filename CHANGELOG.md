@@ -14,9 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 自动发布流程
   - PR 自动检查流程
 - Markdown 代码规范配置
+- 测试框架和示例测试
+  - pytest 配置
+  - 配置模块测试
+  - 安全模块测试
+  - API 端点测试
+  - 测试文档
+- GitHub Actions 状态徽章
+- MIT License
 
 ### Changed
-- 待修改的功能
+- 更新 README.md，添加构建状态徽章
 
 ### Fixed
 - 待修复的问题
