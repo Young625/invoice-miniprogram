@@ -32,6 +32,7 @@ class Invoice(BaseModel):
 
     # 商品信息
     items: List[str] = []  # 商品名称列表
+    project_name: Optional[str] = None  # 发票项目名称（从items中提取的主要项目）
 
     # 来源信息
     email_subject: Optional[str] = None  # 邮件主题

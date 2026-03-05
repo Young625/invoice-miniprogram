@@ -11,6 +11,7 @@ Page({
     startDate: '',
     endDate: '',
     invoiceType: '',
+    projectName: '',
     loading: false,
     hasMore: true,
     types: [
@@ -21,6 +22,23 @@ Page({
       { value: '增值税专用发票', label: '增值税专用发票' }
     ],
     typeIndex: 0,
+    // 固定的项目列表
+    projectNames: [
+      { value: '', label: '全部项目' },
+      { value: '餐饮服务', label: '餐饮服务' },
+      { value: '运输服务', label: '运输服务' },
+      { value: '住宿服务', label: '住宿服务' },
+      { value: '办公用品', label: '办公用品' },
+      { value: '金融服务', label: '金融服务' },
+      { value: '通讯服务', label: '通讯服务' },
+      { value: '会议服务', label: '会议服务' },
+      { value: '培训服务', label: '培训服务' },
+      { value: '咨询服务', label: '咨询服务' },
+      { value: '租赁服务', label: '租赁服务' },
+      { value: '维修服务', label: '维修服务' },
+      { value: '其他', label: '其他' }
+    ],
+    projectIndex: 0,
     // 多选相关
     selectedIds: [],
     selectedMap: {}, // 新增：用对象来存储选中状态
@@ -99,7 +117,8 @@ Page({
           keyword: this.data.keyword,
           start_date: this.data.startDate,
           end_date: this.data.endDate,
-          invoice_type: this.data.invoiceType
+          invoice_type: this.data.invoiceType,
+          project_name: this.data.projectName
         }
       })
 
@@ -194,6 +213,20 @@ Page({
     this.setData({
       typeIndex: index,
       invoiceType: this.data.types[index].value
+    })
+    this.refreshData()
+  },
+
+  // 项目筛选
+  onProjectChange(e) {
+    if (this.data.isGuest) {
+      this.showLoginGuide()
+      return
+    }
+    const index = e.detail.value
+    this.setData({
+      projectIndex: index,
+      projectName: this.data.projectNames[index].value
     })
     this.refreshData()
   },

@@ -32,6 +32,10 @@
         <text class="info-label">开票日期</text>
         <text class="info-value">{{invoice.invoice_date || '-'}}</text>
       </view>
+      <view wx:if="{{invoice.project_name}}" class="info-item">
+        <text class="info-label">发票类目</text>
+        <text class="info-value project-name">{{invoice.project_name}}</text>
+      </view>
     </view>
 
     <!-- 购买方信息 -->

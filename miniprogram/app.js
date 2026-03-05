@@ -4,13 +4,16 @@ App({
     userInfo: null,
     token: null,
     // 线上
-    apiBase: 'https://invoice.zjugpt.com/api',
+    // apiBase: 'https://invoice.zjugpt.com/api',
 
     // 开发
-    // apiBase: 'http://192.168.0.17:8000/api',
+     apiBase: 'http://192.168.0.17:8000/api',
 
     // 版本号（每次发版时更新）
-    version: '2.0.2'
+    version: '2.0.3',
+
+    // 上次检查更新的时间戳
+    lastUpdateCheckTime: 0
   },
 
 
@@ -28,8 +31,22 @@ App({
     }
   },
 
+  onShow() {
+    console.log('小程序显示')
+    // 每次从后台切换到前台时也检查更新
+    this.checkUpdate()
+  },
+
   // 检查小程序更新
   checkUpdate() {
+    // 防抖：5分钟内不重复检查
+    const now = Date.now()
+    if (now - this.globalData.lastUpdateCheckTime < 5 * 60 * 1000) {
+      console.log('距离上次检查更新不到5分钟，跳过本次检查')
+      return
+    }
+    this.globalData.lastUpdateCheckTime = now
+
     // 判断是否支持版本更新检测（基础库 1.9.90+ 支持）
     if (!wx.canIUse('getUpdateManager')) {
       console.log('当前微信版本过低，无法使用更新功能，请升级微信')

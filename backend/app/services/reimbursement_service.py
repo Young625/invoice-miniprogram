@@ -26,37 +26,40 @@ class ReimbursementService:
     def __init__(self):
         # 注册中文字体（支持多平台）
         self.font_name = 'SimSun'  # 默认字体名
+        self.font_registered = False  # 标记是否成功注册中文字体
         try:
             # 尝试多个字体路径
             font_paths = [
+                # Windows 字体路径（优先使用 .ttf 文件，避免 .ttc 文件的兼容性问题）
+                "C:/Windows/Fonts/simhei.ttf",  # 黑体 (TTF)
+                "C:/Windows/Fonts/msyh.ttf",  # 微软雅黑 (TTF)
+                "C:/Windows/Fonts/msyhbd.ttf",  # 微软雅黑粗体 (TTF)
+                "C:/Windows/Fonts/simsun.ttc",  # 宋体 (TTC)
+                "C:/Windows/Fonts/msyh.ttc",  # 微软雅黑 (TTC)
                 # Linux 常见字体路径
                 "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
                 "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf",
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
                 "/usr/share/fonts/truetype/arphic/uming.ttc",
-                # Windows 字体路径
-                "C:/Windows/Fonts/simhei.ttf",
-                "C:/Windows/Fonts/simsun.ttc",
                 # macOS 字体路径
                 "/System/Library/Fonts/PingFang.ttc",
                 "/System/Library/Fonts/STHeiti Light.ttc",
             ]
 
-            font_registered = False
             for font_path in font_paths:
                 if os.path.exists(font_path):
                     try:
                         pdfmetrics.registerFont(TTFont('ChineseFont', font_path))
                         self.font_name = 'ChineseFont'
-                        font_registered = True
+                        self.font_registered = True
                         logger.info(f"成功注册中文字体: {font_path}")
                         break
                     except Exception as e:
                         logger.warning(f"注册字体失败 {font_path}: {e}")
                         continue
 
-            if not font_registered:
-                logger.warning("未找到中文字体，将使用默认字体（可能无法显示中文）")
+            if not self.font_registered:
+                logger.warning("未找到中文字体，将使用默认字体（中文和特殊符号可能无法显示）")
 
         except Exception as e:
             logger.error(f"字体注册过程出错: {e}")

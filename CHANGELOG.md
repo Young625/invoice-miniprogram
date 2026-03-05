@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 发票项目分类功能
+  - 后端：发票模型添加 project_name 字段
+  - 后端：发票列表 API 支持项目筛选
+  - 后端：新增发票更新 API（支持更新项目名称）
+  - 后端：邮件服务自动提取并分类发票项目（11个固定类别）
+  - 前端：发票列表页面添加项目筛选器
+  - 前端：发票详情页面显示项目类别
+  - 前端：优化筛选器 UI 设计（卡片式布局）
+- 数据库迁移脚本
+  - migrate_project_name.py
+  - migrate_project_name_optimized.py
+  - update_project_categories.py
+  - verify_migration.py
 - 用户邮箱配置功能
   - 后端 API 支持邮箱配置的保存和获取
   - 用户模型添加邮箱配置字段
@@ -17,11 +30,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 优化邮件服务
   - 改进邮件提取逻辑
   - 增强错误处理
+  - 自动提取发票项目名称（支持星号格式解析）
+- 优化报销服务
+  - 改进中文字体注册逻辑
+  - 优先使用 TTF 字体文件（避免 TTC 兼容性问题）
+  - 增强字体加载的容错性
 - 优化小程序设置页面
   - 完善邮箱配置界面
   - 改进用户体验
   - 优化页面样式
+- 优化小程序列表页面
+  - 重新设计筛选器 UI（图标 + 卡片式布局）
+  - 添加项目标签显示
+  - 改进视觉效果和交互体验
+- 优化小程序详情页面
+  - 添加项目类别显示
+  - 优化样式
 - 更新小程序配置
+  - 添加更新检查防抖（5分钟）
+  - 版本号更新至 2.0.3
 
 ### Security
 - 从 Git 跟踪中移除敏感配置文件
@@ -31,7 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 添加安全配置指南
 
 ### Fixed
-- 待修复的问题
+- 修复报销服务中文字体显示问题
+- 修复小程序频繁检查更新的问题
 
 ## [0.2.0] - 2026-03-05
 

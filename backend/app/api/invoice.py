@@ -25,6 +25,7 @@ async def get_invoices(
     start_date: Optional[str] = Query(None, description="开始日期 YYYY-MM-DD"),
     end_date: Optional[str] = Query(None, description="结束日期 YYYY-MM-DD"),
     invoice_type: Optional[str] = Query(None, description="发票类型"),
+    project_name: Optional[str] = Query(None, description="发票项目"),
     current_user: User = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
@@ -35,6 +36,7 @@ async def get_invoices(
     - 支持关键词搜索
     - 支持日期筛选
     - 支持类型筛选
+    - 支持项目筛选
     """
     # 构建查询条件
     query = {"user_id": current_user.openid}
@@ -60,6 +62,10 @@ async def get_invoices(
     # 类型筛选
     if invoice_type:
         query["invoice_type"] = invoice_type
+
+    # 项目筛选
+    if project_name:
+        query["project_name"] = project_name
 
     # 计算总数
     total = await db.invoices.count_documents(query)
@@ -224,6 +230,37 @@ async def mark_invoice_exported(
         raise HTTPException(status_code=404, detail="发票不存在")
 
     return {"message": "标记成功"}
+
+
+@router.patch("/{invoice_id}")
+async def update_invoice(
+    invoice_id: str,
+    project_name: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """更新发票信息（目前支持更新项目名称）"""
+    if not ObjectId.is_valid(invoice_id):
+        raise HTTPException(status_code=400, detail="无效的发票 ID")
+
+    # 构建更新字段
+    update_fields = {}
+    if project_name is not None:
+        update_fields["project_name"] = project_name
+
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="没有需要更新的字段")
+
+    # 更新发票
+    result = await db.invoices.update_one(
+        {"_id": ObjectId(invoice_id), "user_id": current_user.openid},
+        {"$set": update_fields}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="发票不存在")
+
+    return {"message": "更新成功"}
 
 
 @router.get("/{invoice_id}/pdf")

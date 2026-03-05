@@ -171,6 +171,34 @@ class EmailService:
                                     tax_amount = parse_amount(info.tax_amount)
                                     total_amount = parse_amount(info.total_amount)
 
+                                    # 提取项目名称（从items中提取第一个非空项目，并提取星号之间的内容）
+                                    # 定义固定的项目列表
+                                    FIXED_PROJECTS = [
+                                        '餐饮服务', '运输服务', '住宿服务', '办公用品',
+                                        '金融服务', '通讯服务', '会议服务', '培训服务',
+                                        '咨询服务', '租赁服务', '维修服务'
+                                    ]
+
+                                    project_name = None
+                                    if info.items and len(info.items) > 0:
+                                        first_item = info.items[0].strip() if info.items[0] else None
+                                        if first_item:
+                                            # 尝试匹配 *xxx* 格式，提取星号之间的内容
+                                            import re
+                                            match = re.search(r'\*([^*]+)\*', first_item)
+                                            if match:
+                                                extracted_name = match.group(1).strip()
+                                            else:
+                                                # 如果没有星号，使用原文本
+                                                extracted_name = first_item
+
+                                            # 检查是否在固定列表中
+                                            if extracted_name in FIXED_PROJECTS:
+                                                project_name = extracted_name
+                                            else:
+                                                # 不在固定列表中，归类为"其他"
+                                                project_name = '其他'
+
                                     # 创建发票记录
                                     invoice = Invoice(
                                         user_id=user.openid,
@@ -186,6 +214,7 @@ class EmailService:
                                         tax_amount=tax_amount,
                                         total_amount=total_amount,
                                         items=info.items,
+                                        project_name=project_name,
                                         email_subject=email_msg.subject,
                                         source_type="attachment" if filename in [a[0] for a in email_msg.attachments] else "link",
                                         pdf_path=pdf_path,

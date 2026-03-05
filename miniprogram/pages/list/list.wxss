@@ -67,45 +67,73 @@ page {
   color: #94A3B8;
 }
 
-/* 筛选器 */
-.filters {
-  display: flex;
-  gap: 10px;
-  padding: 0 16px 14px;
+/* 筛选器容器 */
+.filters-container {
   background: linear-gradient(180deg, #F8FAFC 0%, #F2F4F8 100%);
+  padding: 0 16px 16px;
 }
 
 .filter-item {
-  flex: 1;
-  padding: 12px 10px;
-  background: linear-gradient(145deg, #F5F7FA 0%, #EEF2F7 100%);
-  border-radius: 12px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  text-align: center;
-  transition: all 0.2s;
+  width: 100%;
+  margin-bottom: 10px;
+  background: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+  border-radius: 14px;
+  border: 1.5px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.filter-item:last-child {
+  margin-bottom: 0;
 }
 
 .filter-item:active {
-  background: linear-gradient(145deg, #EEF2F7 0%, #E2E8F0 100%);
+  background: linear-gradient(145deg, #F8FAFC 0%, #EEF2F7 100%);
+  transform: scale(0.99);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.filter-content {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.filter-icon {
+  font-size: 24px;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+
+.filter-text {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 0;
 }
 
 .filter-label {
-  display: block;
-  font-size: 11px;
-  color: #94A3B8;
-  margin-bottom: 4px;
-  letter-spacing: 0.2px;
+  font-size: 15px;
+  color: #64748B;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-right: 12px;
 }
 
 .filter-value {
-  display: block;
-  font-size: 13px;
+  font-size: 15px;
   color: #94A3B8;
   font-weight: 500;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .filter-value.has-value {
-  color: #1E293B;
+  color: #2563EB;
+  font-weight: 700;
 }
 
 /* 多选工具栏 */
@@ -305,6 +333,19 @@ page {
   padding: 4px 10px;
   background: #EFF6FF;
   color: #2563EB;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  margin-right: 6px;
+  letter-spacing: 0.2px;
+}
+
+.invoice-project-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #F0FDF4;
+  color: #16A34A;
   font-size: 11px;
   font-weight: 600;
   border-radius: 8px;
