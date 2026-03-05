@@ -45,6 +45,7 @@ class User(BaseModel):
     phone: Optional[str] = None
     email: Optional[EmailStr] = None
     email_configs: List[EmailConfig] = Field(default_factory=list)  # 支持多个邮箱
+    auto_sync_enabled: Optional[bool] = False  # 是否启用自动同步（默认关闭，需用户主动开启）
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     is_active: bool = True

@@ -4,7 +4,7 @@ App({
     userInfo: null,
     token: null,
     // 线上
-     apiBase: 'https://invoice.zjugpt.com/api',
+    apiBase: 'https://invoice.zjugpt.com/api',
 
     // 开发
     // apiBase: 'http://192.168.0.17:8000/api',

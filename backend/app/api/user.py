@@ -242,3 +242,38 @@ async def set_primary_email(
     logger.info(f"用户 {current_user.openid} 主邮箱设置成功: {selected_config.get('username')}")
 
     return {"message": "主邮箱设置成功", "primary_email": selected_config.get("username")}
+
+
+@router.get("/auto-sync-status")
+async def get_auto_sync_status(
+    current_user: User = Depends(get_current_user)
+):
+    """获取自动同步状态"""
+    # 如果 auto_sync_enabled 为 None，则返回 False
+    enabled = current_user.auto_sync_enabled if current_user.auto_sync_enabled is not None else False
+    return {"auto_sync_enabled": enabled}
+
+
+@router.put("/auto-sync-status")
+async def update_auto_sync_status(
+    request_data: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """更新自动同步状态"""
+    enabled = request_data.get("enabled", False)
+    logger.info(f"用户 {current_user.openid} 更新自动同步状态: {enabled}")
+
+    result = await db.users.update_one(
+        {"openid": current_user.openid},
+        {
+            "$set": {
+                "auto_sync_enabled": enabled,
+                "updated_at": datetime.utcnow()
+            }
+        }
+    )
+
+    logger.info(f"用户 {current_user.openid} 自动同步状态更新成功")
+
+    return {"message": "自动同步状态已更新", "auto_sync_enabled": enabled}

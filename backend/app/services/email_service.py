@@ -273,22 +273,25 @@ class EmailService:
 
     async def process_all_users(self) -> dict:
         """
-        处理所有配置了邮箱的用户（支持并发处理）
+        处理所有配置了邮箱且开启自动同步的用户（支持并发处理）
 
         Returns:
             处理结果统计
         """
         logger.info("开始处理所有用户的邮箱")
 
-        # 查找所有配置了邮箱的用户（使用新的email_configs字段）
-        cursor = self.db.users.find({"email_configs": {"$exists": True, "$ne": []}})
+        # 查找所有配置了邮箱且开启自动同步的用户
+        cursor = self.db.users.find({
+            "email_configs": {"$exists": True, "$ne": []},
+            "auto_sync_enabled": True  # 只同步明确开启的用户（默认关闭）
+        })
         users = await cursor.to_list(length=None)
 
         if not users:
-            logger.info("没有用户配置邮箱")
+            logger.info("没有用户配置邮箱或开启自动同步")
             return {"total_users": 0, "total_invoices": 0}
 
-        logger.info(f"找到 {len(users)} 个配置了邮箱的用户")
+        logger.info(f"找到 {len(users)} 个配置了邮箱且开启自动同步的用户")
 
         # 并发处理用户（限制并发数为10）
         import asyncio

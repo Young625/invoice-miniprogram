@@ -281,7 +281,7 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 13px 0;
+  padding: 16px 0;
   border-bottom: 1px solid #F1F5F9;
 }
 
@@ -292,21 +292,43 @@ page {
 .setting-left {
   display: flex;
   align-items: center;
+  flex: 1;
+  margin-right: 16px;
+}
+
+/* 自动同步设置项特殊样式 */
+.auto-sync-setting .setting-left {
+  align-items: center;
+}
+
+.auto-sync-setting .setting-icon {
+  line-height: 1;
 }
 
 .setting-icon {
-  font-size: 20px;
-  margin-right: 12px;
+  font-size: 22px;
+  margin-right: 14px;
+  flex-shrink: 0;
 }
 
 .setting-text {
-  font-size: 14px;
-  color: #334155;
+  font-size: 15px;
+  color: #1E293B;
+  font-weight: 500;
+}
+
+.setting-desc {
+  display: block;
+  font-size: 12px;
+  color: #94A3B8;
+  margin-top: 6px;
+  line-height: 1.6;
 }
 
 .setting-arrow {
-  color: #CBD5E1;
-  font-size: 16px;
+  color: #94A3B8;
+  font-size: 20px;
+  font-weight: 300;
 }
 
 /* 弹窗 */

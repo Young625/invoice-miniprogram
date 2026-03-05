@@ -53,6 +53,7 @@ Page({
     emailConfig: null,  // 保留兼容
     emailConfigs: [],   // 新增：邮箱配置列表
     maxEmailConfigs: 3, // 最多支持3个邮箱
+    autoSyncEnabled: false,  // 自动同步开关（默认关闭）
     notifications: {
       newInvoice: true,
       monthlySummary: true
@@ -96,6 +97,7 @@ Page({
       this.setData({ isGuest: false })
       this.loadUserInfo()
       this.loadEmailConfig()
+      this.loadAutoSyncStatus()
     } else {
       // 游客模式，显示默认界面
       this.setData({
@@ -123,6 +125,7 @@ Page({
       // 重新加载用户信息和邮箱配置，确保数据最新
       this.loadUserInfo()
       this.loadEmailConfig()
+      this.loadAutoSyncStatus()
     } else {
       // 没有 token，显示游客模式
       this.setData({
@@ -194,6 +197,22 @@ Page({
       })
     } catch (err) {
       console.error('加载邮箱配置失败', err)
+    }
+  },
+
+  // 加载自动同步状态
+  async loadAutoSyncStatus() {
+    try {
+      const response = await app.request({
+        url: '/user/auto-sync-status',
+        method: 'GET'
+      })
+
+      this.setData({
+        autoSyncEnabled: response.auto_sync_enabled !== undefined ? response.auto_sync_enabled : false
+      })
+    } catch (err) {
+      console.error('加载自动同步状态失败', err)
     }
   },
 
@@ -665,6 +684,45 @@ Page({
     }
   },
 
+  // 切换自动同步
+  async toggleAutoSync(e) {
+    if (this.data.isGuest) {
+      this.showLoginGuide()
+      return
+    }
+
+    const newValue = e.detail.value
+
+    try {
+      await app.request({
+        url: '/user/auto-sync-status',
+        method: 'PUT',
+        data: {
+          enabled: newValue
+        }
+      })
+
+      this.setData({
+        autoSyncEnabled: newValue
+      })
+
+      wx.showToast({
+        title: newValue ? '已开启自动同步' : '已关闭自动同步',
+        icon: 'success'
+      })
+    } catch (err) {
+      console.error('更新自动同步状态失败', err)
+      // 如果失败，恢复原值
+      this.setData({
+        autoSyncEnabled: !newValue
+      })
+      wx.showToast({
+        title: '设置失败',
+        icon: 'none'
+      })
+    }
+  },
+
   // 切换通知设置
   toggleNotification(e) {
     if (this.data.isGuest) {
@@ -696,10 +754,12 @@ Page({
 
   // 关于我们
   showAbout() {
+    const version = app.globalData.version || '1.0.0'
     wx.showModal({
       title: '关于发票管家',
-      content: '版本：1.0.0\n\n自动提取邮箱发票，智能统计分析，轻松管理每一张发票。',
-      showCancel: false
+      content: '版本：' + version + '\n\n自动提取邮箱发票，智能统计分析，轻松管理每一张发票。',
+      showCancel: false,
+      confirmText: '知道了'
     })
   },
 

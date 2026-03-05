@@ -49,7 +49,9 @@
       "Bash(git add .github/ .markdownlint.json)",
       "Bash(powershell.exe -Command \"New-Item -ItemType Directory -Force -Path ''backend\\\\tests''\")",
       "Bash(git add README.md LICENSE CHANGELOG.md backend/tests/ backend/pytest.ini)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git tag -a v0.2.0 -m \"Release v0.2.0: Enhanced Services and Deployment:*)",
+      "Bash(git push origin v0.2.0)"
     ]
   }
 }

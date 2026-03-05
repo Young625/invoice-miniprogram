@@ -8,37 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- 后端部署脚本
-  - systemd 服务配置文件
-  - 启动/停止脚本
-  - 后台启动指南
+- 用户邮箱配置功能
+  - 后端 API 支持邮箱配置的保存和获取
+  - 用户模型添加邮箱配置字段
 
 ### Changed
-- 优化邮件服务（email_service.py）
+- 优化邮件服务
   - 改进邮件提取逻辑
   - 增强错误处理
-  - 优化性能
-- 优化调度服务（scheduler_service.py）
-  - 改进定时任务管理
-  - 增强稳定性
-- 优化微信服务（wechat_service.py）
-  - 增强微信登录功能
-  - 改进用户信息处理
-- 优化发票解析器（invoice_parser.py）
-  - 改进日期解析
-  - 增强容错性
-- 更新小程序配置（app.js）
-- 更新设置页面（settings.wxml）
-
-### Removed
-- 删除临时文档文件
-  - FINAL_SUMMARY.md
-  - SUMMARY.md
-  - backend/CLEANUP_REPORT.md
+- 优化小程序设置页面
+  - 完善邮箱配置界面
+  - 改进用户体验
+  - 优化页面样式
+- 更新小程序配置
 
 ### Fixed
-- 修复发票日期解析问题
-- 修复邮件服务稳定性问题
+- 待修复的问题
 
 ## [0.2.0] - 2026-03-05
 

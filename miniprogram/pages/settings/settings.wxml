@@ -62,6 +62,22 @@
     <view wx:if="{{emailConfigs.length > 0}}" class="sync-btn" bindtap="syncInvoices">
       <text>立即同步发票</text>
     </view>
+
+    <!-- 自动同步开关 -->
+    <view wx:if="{{emailConfigs.length > 0}}" class="setting-item auto-sync-setting">
+      <view class="setting-left">
+        <text class="setting-icon">🔄</text>
+        <view>
+          <text class="setting-text">自动同步</text>
+          <text class="setting-desc">开启后系统每5分钟自动检查邮箱中的新发票</text>
+        </view>
+      </view>
+      <switch
+        checked="{{autoSyncEnabled}}"
+        bindchange="toggleAutoSync"
+        color="#2563EB"
+      />
+    </view>
   </view>
 
   <!-- 通知设置 -->
@@ -98,17 +114,17 @@
     <view class="section-title">其他</view>
     <view class="setting-item" bindtap="showAbout">
       <view class="setting-left">
-        <text class="setting-icon">ℹ️</text>
+        <text class="setting-icon">💡</text>
         <text class="setting-text">关于我们</text>
       </view>
-      <text class="setting-arrow">></text>
+      <text class="setting-arrow">›</text>
     </view>
     <view class="setting-item" bindtap="logout">
       <view class="setting-left">
-        <text class="setting-icon">🚪</text>
+        <text class="setting-icon">👋</text>
         <text class="setting-text">退出登录</text>
       </view>
-      <text class="setting-arrow">></text>
+      <text class="setting-arrow">›</text>
     </view>
   </view>
 </view>
