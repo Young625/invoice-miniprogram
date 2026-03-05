@@ -63,3 +63,9 @@ NUL
 
 # Generated data files
 data/
+
+# Claude settings (may contain sensitive permissions)
+.claude/
+
+# WeChat MiniProgram private config
+miniprogram/project.private.config.json

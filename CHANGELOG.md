@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 用户邮箱配置功能
   - 后端 API 支持邮箱配置的保存和获取
   - 用户模型添加邮箱配置字段
+- 安全配置文档（SECURITY.md）
 
 ### Changed
 - 优化邮件服务
@@ -21,6 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 改进用户体验
   - 优化页面样式
 - 更新小程序配置
+
+### Security
+- 从 Git 跟踪中移除敏感配置文件
+  - .claude/settings.local.json
+  - miniprogram/project.private.config.json
+- 更新 .gitignore，排除敏感文件
+- 添加安全配置指南
 
 ### Fixed
 - 待修复的问题
