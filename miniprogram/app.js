@@ -4,13 +4,13 @@ App({
     userInfo: null,
     token: null,
     // 线上
-    // apiBase: 'https://invoice.zjugpt.com/api',
+    apiBase: 'https://invoice.zjugpt.com/api',
 
     // 开发
-     apiBase: 'http://192.168.0.17:8000/api',
+    // apiBase: 'http://192.168.0.17:8000/api',
 
     // 版本号（每次发版时更新）
-    version: '2.0.3',
+    version: '2.0.4',
 
     // 上次检查更新的时间戳
     lastUpdateCheckTime: 0
@@ -67,12 +67,11 @@ App({
     updateManager.onUpdateReady(() => {
       wx.showModal({
         title: '更新提示',
-        content: '新版本已经准备好，是否重启应用？',
-        success: (res) => {
-          if (res.confirm) {
-            // 强制当前小程序使用新版本并重启
-            updateManager.applyUpdate()
-          }
+        content: '新版本已经准备好，即将重启应用',
+        showCancel: false,
+        success: () => {
+          // 强制当前小程序使用新版本并重启
+          updateManager.applyUpdate()
         }
       })
     })

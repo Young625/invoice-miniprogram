@@ -83,35 +83,31 @@ Page({
     console.log('部门:', this.data.department)
     console.log('发票IDs:', this.data.invoiceIds)
 
-    if (!this.data.name) {
-      wx.showToast({
-        title: '请填写报销人',
-        icon: 'none'
-      })
-      return
-    }
-
-    if (!this.data.department) {
-      wx.showToast({
-        title: '请填写部门',
-        icon: 'none'
-      })
-      return
-    }
-
     this.setData({ loading: true })
     console.log('开始请求后端API')
 
     try {
+      // 只发送已填写的字段
+      const requestData = {
+        invoice_ids: this.data.invoiceIds
+      }
+
+      if (this.data.name && this.data.name.trim()) {
+        requestData.name = this.data.name.trim()
+      }
+
+      if (this.data.department && this.data.department.trim()) {
+        requestData.department = this.data.department.trim()
+      }
+
+      if (this.data.reason && this.data.reason.trim()) {
+        requestData.reason = this.data.reason.trim()
+      }
+
       const res = await app.request({
         url: '/reimbursement/generate',
         method: 'POST',
-        data: {
-          invoice_ids: this.data.invoiceIds,
-          name: this.data.name,
-          department: this.data.department,
-          reason: this.data.reason
-        },
+        data: requestData,
         responseType: 'arraybuffer'
       })
 
@@ -201,12 +197,35 @@ Page({
 
   // 保存到收藏
   saveToFavorites(filePath) {
-    // 获取系统信息，判断是iOS还是Android
+    // 使用 addFileToFavorites 直接保存到微信收藏
+    wx.addFileToFavorites({
+      filePath: filePath,
+      fileName: `报销包_${Date.now()}.zip`,
+      success: () => {
+        console.log('成功保存到微信收藏')
+        wx.showToast({
+          title: '已保存到收藏',
+          icon: 'success'
+        })
+        // 返回列表页
+        setTimeout(() => {
+          wx.navigateBack()
+        }, 1500)
+      },
+      fail: (err) => {
+        console.error('保存到收藏失败', err)
+        // 如果保存到收藏失败，尝试其他方式
+        this.fallbackSave(filePath)
+      }
+    })
+  },
+
+  // 备用保存方案
+  fallbackSave(filePath) {
     const systemInfo = wx.getSystemInfoSync()
     const isIOS = systemInfo.platform === 'ios'
 
-    console.log('系统平台:', systemInfo.platform)
-    console.log('是否为iOS:', isIOS)
+    console.log('使用备用保存方案，系统平台:', systemInfo.platform)
 
     if (isIOS) {
       // iOS系统：使用 saveFileToDisk 保存到文件
@@ -217,17 +236,15 @@ Page({
             title: '保存成功',
             icon: 'success'
           })
-          // 返回列表页
           setTimeout(() => {
             wx.navigateBack()
           }, 1500)
         },
         fail: (err) => {
           console.error('iOS保存文件失败', err)
-          // 如果 saveFileToDisk 失败，尝试使用分享方式
           wx.showModal({
             title: '提示',
-            content: 'iOS系统暂不支持直接保存zip文件，请使用分享功能发送到微信或其他应用',
+            content: '保存失败，请使用分享功能发送到微信或其他应用',
             confirmText: '去分享',
             cancelText: '取消',
             success: (res) => {
@@ -239,34 +256,23 @@ Page({
         }
       })
     } else {
-      // Android系统：使用 openDocument 打开文件
-      wx.openDocument({
+      // Android系统：使用 saveFileToDisk
+      wx.saveFileToDisk({
         filePath: filePath,
-        fileType: 'zip',
         success: () => {
           wx.showToast({
-            title: '已打开文件',
+            title: '保存成功',
             icon: 'success'
           })
+          setTimeout(() => {
+            wx.navigateBack()
+          }, 1500)
         },
         fail: (err) => {
-          console.error('Android打开文件失败', err)
-          // Android打开失败，尝试保存到磁盘
-          wx.saveFileToDisk({
-            filePath: filePath,
-            success: () => {
-              wx.showToast({
-                title: '保存成功',
-                icon: 'success'
-              })
-            },
-            fail: (saveErr) => {
-              console.error('保存到磁盘失败', saveErr)
-              wx.showToast({
-                title: '打开失败，请手动查找文件',
-                icon: 'none'
-              })
-            }
+          console.error('Android保存文件失败', err)
+          wx.showToast({
+            title: '保存失败',
+            icon: 'none'
           })
         }
       })

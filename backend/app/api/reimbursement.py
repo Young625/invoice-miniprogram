@@ -17,9 +17,9 @@ router = APIRouter(prefix="/reimbursement", tags=["报销"])
 class ReimbursementRequest(BaseModel):
     """报销包生成请求"""
     invoice_ids: List[str]
-    name: str = "未填写"
-    department: str = "未填写"
-    reason: str = "业务费用报销"
+    name: str = None
+    department: str = None
+    reason: str = None
 
 
 @router.post("/generate")

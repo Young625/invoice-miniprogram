@@ -36,6 +36,10 @@
         <view class="content-icon">📦</view>
         <text class="content-text">发票原件（PDF打包）</text>
       </view>
+      <view class="content-item">
+        <view class="content-icon">📑</view>
+        <text class="content-text">发票原件合并（单个PDF）</text>
+      </view>
     </view>
   </view>
 
@@ -44,34 +48,41 @@
     <view class="section-title">报销单信息</view>
     <view class="form">
       <view class="form-item">
-        <text class="form-label">报销人</text>
-        <input
-          class="form-input"
+        <text class="form-label">报销人<text class="optional-hint">（选填）</text></text>
+        <textarea
+          class="form-input-single"
           placeholder-class="input-placeholder"
           placeholder="请输入报销人姓名"
           value="{{name}}"
           bindinput="onNameInput"
+          auto-height="{{false}}"
+          show-confirm-bar="{{true}}"
+          maxlength="50"
         />
       </view>
       <view class="form-item">
-        <text class="form-label">部门</text>
-        <input
-          class="form-input"
+        <text class="form-label">部门<text class="optional-hint">（选填）</text></text>
+        <textarea
+          class="form-input-single"
           placeholder-class="input-placeholder"
           placeholder="请输入部门"
           value="{{department}}"
           bindinput="onDepartmentInput"
+          auto-height="{{false}}"
+          show-confirm-bar="{{true}}"
+          maxlength="50"
         />
       </view>
       <view class="form-item">
-        <text class="form-label">报销事由</text>
+        <text class="form-label">报销事由<text class="optional-hint">（选填）</text></text>
         <textarea
           class="form-textarea"
           placeholder-class="input-placeholder"
-          placeholder="选填，如：差旅费、办公用品"
+          placeholder="如：差旅费、办公用品等"
           value="{{reason}}"
           bindinput="onReasonInput"
           maxlength="200"
+          show-confirm-bar="{{true}}"
         />
       </view>
     </view>

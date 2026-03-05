@@ -199,6 +199,10 @@ class EmailService:
                                                 # 不在固定列表中，归类为"其他"
                                                 project_name = '其他'
 
+                                    # 如果 items 为空或无法提取，设置默认值
+                                    if project_name is None:
+                                        project_name = '其他'
+
                                     # 创建发票记录
                                     invoice = Invoice(
                                         user_id=user.openid,

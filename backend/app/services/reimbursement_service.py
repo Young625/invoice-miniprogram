@@ -14,6 +14,7 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import colors
+from pypdf import PdfWriter, PdfReader
 
 import logging
 
@@ -179,10 +180,22 @@ class ReimbursementService:
 
         # 报销人信息
         reimbursement_no = f"BX{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        c.drawString(3 * cm, y_position, f"报销人: {user_info.get('name', '未填写')}")
-        c.drawString(10 * cm, y_position, f"部门: {user_info.get('department', '未填写')}")
 
-        y_position -= 1 * cm
+        # 只显示已填写的字段
+        name = user_info.get('name')
+        department = user_info.get('department')
+
+        if name:
+            c.drawString(3 * cm, y_position, f"报销人: {name}")
+            if department:
+                c.drawString(10 * cm, y_position, f"部门: {department}")
+                y_position -= 1 * cm
+            else:
+                y_position -= 1 * cm
+        elif department:
+            c.drawString(3 * cm, y_position, f"部门: {department}")
+            y_position -= 1 * cm
+
         c.drawString(3 * cm, y_position, f"日期: {datetime.now().strftime('%Y-%m-%d')}")
         c.drawString(10 * cm, y_position, f"单号: {reimbursement_no}")
 
@@ -237,13 +250,15 @@ class ReimbursementService:
             c.setFont('Helvetica-Bold', 12)
         c.drawString(8 * cm, y_position, f"合计金额: ¥{total_amount:.2f}")
 
-        # 报销事由
-        y_position -= 2 * cm
-        try:
-            c.setFont(self.font_name, 12)
-        except:
-            c.setFont('Helvetica', 12)
-        c.drawString(3 * cm, y_position, f"报销事由: {user_info.get('reason', '业务费用报销')}")
+        # 报销事由（仅在填写时显示）
+        reason = user_info.get('reason')
+        if reason:
+            y_position -= 2 * cm
+            try:
+                c.setFont(self.font_name, 12)
+            except:
+                c.setFont('Helvetica', 12)
+            c.drawString(3 * cm, y_position, f"报销事由: {reason}")
 
         # 签字栏
         y_position -= 3 * cm
@@ -261,6 +276,55 @@ class ReimbursementService:
         c.save()
         buffer.seek(0)
         return buffer.getvalue()
+
+    def merge_invoice_pdfs(
+        self,
+        invoices: List[Dict[str, Any]],
+        pdf_dir: str
+    ) -> bytes:
+        """
+        合并所有发票PDF为一个文件
+
+        Args:
+            invoices: 发票列表
+            pdf_dir: 发票PDF文件存储目录
+
+        Returns:
+            合并后的PDF文件字节内容，如果没有可合并的PDF则返回None
+        """
+        pdf_writer = PdfWriter()
+        merged_count = 0
+
+        for idx, invoice in enumerate(invoices, 1):
+            pdf_path = invoice.get('pdf_path')
+            if pdf_path:
+                # 统一路径分隔符
+                pdf_path = pdf_path.replace('\\', os.sep).replace('/', os.sep)
+                full_pdf_path = os.path.join(pdf_dir, pdf_path)
+
+                if os.path.exists(full_pdf_path):
+                    try:
+                        # 读取PDF并添加到合并器
+                        pdf_reader = PdfReader(full_pdf_path)
+                        for page in pdf_reader.pages:
+                            pdf_writer.add_page(page)
+                        merged_count += 1
+                        logger.info(f"已合并发票PDF: {invoice.get('invoice_number')}")
+                    except Exception as e:
+                        logger.error(f"合并PDF失败: {full_pdf_path}, {e}")
+                else:
+                    logger.warning(f"发票PDF文件不存在: {full_pdf_path}")
+
+        # 如果有成功合并的PDF，返回字节内容
+        if merged_count > 0:
+            output = io.BytesIO()
+            pdf_writer.write(output)
+            output.seek(0)
+            logger.info(f"成功合并 {merged_count} 个发票PDF")
+            return output.getvalue()
+        else:
+            logger.warning("没有可合并的发票PDF")
+            return None
 
     def create_reimbursement_package(
         self,
@@ -325,6 +389,12 @@ class ReimbursementService:
                     logger.warning(f"发票 {invoice.get('invoice_number')} 没有 PDF 路径")
 
             logger.info(f"已添加 {pdf_count}/{len(invoices)} 个发票原件 PDF")
+
+            # 4. 添加合并后的发票PDF
+            merged_pdf = self.merge_invoice_pdfs(invoices, pdf_dir)
+            if merged_pdf:
+                zip_file.writestr('发票原件合并.pdf', merged_pdf)
+                logger.info("已添加合并后的发票PDF")
 
         zip_buffer.seek(0)
         return zip_buffer.getvalue()
