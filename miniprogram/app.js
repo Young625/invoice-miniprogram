@@ -10,8 +10,9 @@ App({
     // apiBase: 'http://192.168.0.17:8000/api',
 
     // 版本号（每次发版时更新）
-    version: '2.0.1'
+    version: '2.0.2'
   },
+
 
   onLaunch() {
     console.log('小程序启动')

@@ -1,0 +1,19 @@
+[Unit]
+Description=Invoice MiniProgram Backend Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/data/kaipiaoxia/code/backend
+Environment="PATH=/root/miniconda3/envs/invoice-backend/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/root/miniconda3/envs/invoice-backend/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=10
+
+# 日志配置
+StandardOutput=append:/data/kaipiaoxia/code/backend/logs/systemd.log
+StandardError=append:/data/kaipiaoxia/code/backend/logs/systemd-error.log
+
+[Install]
+WantedBy=multi-user.target

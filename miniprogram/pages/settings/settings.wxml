@@ -65,7 +65,7 @@
   </view>
 
   <!-- 通知设置 -->
-  <view class="section">
+  <view wx:if="{{false}}" class="section">
     <view class="section-title">通知设置</view>
     <view class="setting-item">
       <view class="setting-left">

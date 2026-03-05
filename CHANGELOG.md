@@ -8,6 +8,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 后端部署脚本
+  - systemd 服务配置文件
+  - 启动/停止脚本
+  - 后台启动指南
+
+### Changed
+- 优化邮件服务（email_service.py）
+  - 改进邮件提取逻辑
+  - 增强错误处理
+  - 优化性能
+- 优化调度服务（scheduler_service.py）
+  - 改进定时任务管理
+  - 增强稳定性
+- 优化微信服务（wechat_service.py）
+  - 增强微信登录功能
+  - 改进用户信息处理
+- 优化发票解析器（invoice_parser.py）
+  - 改进日期解析
+  - 增强容错性
+- 更新小程序配置（app.js）
+- 更新设置页面（settings.wxml）
+
+### Removed
+- 删除临时文档文件
+  - FINAL_SUMMARY.md
+  - SUMMARY.md
+  - backend/CLEANUP_REPORT.md
+
+### Fixed
+- 修复发票日期解析问题
+- 修复邮件服务稳定性问题
+
+## [0.2.0] - 2026-03-05
+
+### Added
 - GitHub Actions 自动化工作流
   - 后端 CI/CD 流程（测试、代码检查）
   - 代码质量检查流程

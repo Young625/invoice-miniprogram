@@ -63,118 +63,171 @@ class EmailService:
                 invoice_count = 0
 
                 with client:
-                    # 获取未读邮件
-                    emails = client.fetch_new_emails(
-                        folder=email_config.folder,
-                        max_count=50
-                    )
+                    # 分页处理邮件，避免遗漏
+                    page_size = 50
+                    total_processed = 0
 
-                    if not emails:
-                        logger.info(f"邮箱 {email_config.username} 没有新邮件")
-                        continue
-
-                    logger.info(f"邮箱 {email_config.username} 发现 {len(emails)} 封新邮件")
-
-                    for email_msg in emails:
-                        logger.info(f"处理邮件: {email_msg.subject} (UID: {email_msg.uid})")
-
-                        # 检查是否已处理（使用邮箱+UID作为唯一标识）
-                        existing = await self.db.invoices.find_one({
-                            "user_id": user.openid,
-                            "email_account": email_config.username,
-                            "email_uid": email_msg.uid
-                        })
-
-                        if existing:
-                            logger.info(f"邮件已处理，跳过: {email_msg.subject} (UID: {email_msg.uid})")
-                            continue
-
-                        # 发票检测
-                        logger.info(f"开始检测邮件中的发票，附件数量: {len(email_msg.attachments)}")
-                        invoice_pdfs = detect_invoices(
-                            email_msg.subject,
-                            email_msg.body_text,
-                            email_msg.attachments
+                    while True:
+                        # 获取未读邮件
+                        emails = client.fetch_new_emails(
+                            folder=email_config.folder,
+                            max_count=page_size
                         )
 
-                        if not invoice_pdfs:
-                            logger.info(f"邮件未检测到发票: {email_msg.subject}")
-                            continue
+                        if not emails:
+                            logger.info(f"邮箱 {email_config.username} 没有更多新邮件")
+                            break
 
-                        logger.info(f"检测到 {len(invoice_pdfs)} 个发票PDF")
+                        logger.info(f"邮箱 {email_config.username} 本批次发现 {len(emails)} 封新邮件")
+                        batch_invoice_count = 0
 
-                        # 处理每个发票 PDF
-                        for filename, pdf_data in invoice_pdfs:
-                            try:
-                                # 解析发票
-                                info = self.parser.parse(pdf_data)
+                        for email_msg in emails:
+                            logger.info(f"处理邮件: {email_msg.subject} (UID: {email_msg.uid})")
 
-                                # 检查发票号码去重
-                                if info.invoice_number:
-                                    existing_invoice = await self.db.invoices.find_one({
+                            # 检查是否已处理（使用邮箱+UID作为唯一标识）
+                            existing = await self.db.invoices.find_one({
+                                "user_id": user.openid,
+                                "email_account": email_config.username,
+                                "email_uid": email_msg.uid
+                            })
+
+                            if existing:
+                                logger.info(f"邮件已处理，跳过: {email_msg.subject} (UID: {email_msg.uid})")
+                                # 标记为已读（即使已处理过，也要标记，避免重复获取）
+                                try:
+                                    client.mark_as_seen(email_msg.uid)
+                                except Exception as e:
+                                    logger.warning(f"标记邮件为已读失败: {e}")
+                                continue
+
+                            # 发票检测
+                            logger.info(f"开始检测邮件中的发票，附件数量: {len(email_msg.attachments)}")
+                            invoice_pdfs = detect_invoices(
+                                email_msg.subject,
+                                email_msg.body_text,
+                                email_msg.attachments
+                            )
+
+                            if not invoice_pdfs:
+                                logger.info(f"邮件未检测到发票: {email_msg.subject}")
+                                # 标记为已读（即使没有发票，也要标记）
+                                try:
+                                    client.mark_as_seen(email_msg.uid)
+                                except Exception as e:
+                                    logger.warning(f"标记邮件为已读失败: {e}")
+                                continue
+
+                            logger.info(f"检测到 {len(invoice_pdfs)} 个发票PDF")
+
+                            # 处理每个发票 PDF
+                            for filename, pdf_data in invoice_pdfs:
+                                try:
+                                    # 解析发票
+                                    info = self.parser.parse(pdf_data)
+
+                                    # ⭐ 添加文件哈希去重检查
+                                    import hashlib
+                                    pdf_hash = hashlib.md5(pdf_data).hexdigest()
+
+                                    # 检查1：文件哈希去重（防止相同PDF重复保存）
+                                    existing_by_hash = await self.db.invoices.find_one({
                                         "user_id": user.openid,
-                                        "invoice_number": info.invoice_number
+                                        "pdf_hash": pdf_hash
                                     })
 
-                                    if existing_invoice:
-                                        logger.info(f"发票号码重复: {info.invoice_number}")
+                                    if existing_by_hash:
+                                        logger.info(f"PDF文件已存在（哈希重复）: {pdf_hash[:8]}...")
                                         continue
 
-                                # 保存 PDF 文件
-                                pdf_path = self._save_pdf(user.openid, filename, pdf_data)
+                                    # 检查2：发票号码去重
+                                    if info.invoice_number:
+                                        existing_invoice = await self.db.invoices.find_one({
+                                            "user_id": user.openid,
+                                            "invoice_number": info.invoice_number
+                                        })
 
-                                # 处理金额字段：将空字符串转换为 None
-                                def parse_amount(value):
-                                    """将金额字段转换为 float 或 None"""
-                                    if value is None or value == '':
-                                        return None
-                                    if isinstance(value, (int, float)):
-                                        return float(value)
-                                    if isinstance(value, str):
-                                        try:
-                                            return float(value.strip())
-                                        except (ValueError, TypeError):
+                                        if existing_invoice:
+                                            logger.info(f"发票号码重复: {info.invoice_number}")
+                                            continue
+
+                                    # ⭐ 所有检查通过后，才保存PDF文件
+                                    pdf_path = self._save_pdf(user.openid, filename, pdf_data)
+
+                                    # 处理金额字段：将空字符串转换为 None
+                                    def parse_amount(value):
+                                        """将金额字段转换为 float 或 None"""
+                                        if value is None or value == '':
                                             return None
-                                    return None
+                                        if isinstance(value, (int, float)):
+                                            return float(value)
+                                        if isinstance(value, str):
+                                            try:
+                                                return float(value.strip())
+                                            except (ValueError, TypeError):
+                                                return None
+                                        return None
 
-                                amount = parse_amount(info.amount)
-                                tax_amount = parse_amount(info.tax_amount)
-                                total_amount = parse_amount(info.total_amount)
+                                    amount = parse_amount(info.amount)
+                                    tax_amount = parse_amount(info.tax_amount)
+                                    total_amount = parse_amount(info.total_amount)
 
-                                # 创建发票记录
-                                invoice = Invoice(
-                                    user_id=user.openid,
-                                    invoice_type=info.invoice_type,
-                                    invoice_code=info.invoice_code,
-                                    invoice_number=info.invoice_number,
-                                    invoice_date=info.invoice_date,
-                                    buyer_name=info.buyer_name,
-                                    buyer_tax_id=info.buyer_tax_id,
-                                    seller_name=info.seller_name,
-                                    seller_tax_id=info.seller_tax_id,
-                                    amount=amount,
-                                    tax_amount=tax_amount,
-                                    total_amount=total_amount,
-                                    items=info.items,
-                                    email_subject=email_msg.subject,
-                                    source_type="attachment" if filename in [a[0] for a in email_msg.attachments] else "link",
-                                    pdf_path=pdf_path,
-                                    is_valid=info.is_valid
-                                )
+                                    # 创建发票记录
+                                    invoice = Invoice(
+                                        user_id=user.openid,
+                                        invoice_type=info.invoice_type,
+                                        invoice_code=info.invoice_code,
+                                        invoice_number=info.invoice_number,
+                                        invoice_date=info.invoice_date,
+                                        buyer_name=info.buyer_name,
+                                        buyer_tax_id=info.buyer_tax_id,
+                                        seller_name=info.seller_name,
+                                        seller_tax_id=info.seller_tax_id,
+                                        amount=amount,
+                                        tax_amount=tax_amount,
+                                        total_amount=total_amount,
+                                        items=info.items,
+                                        email_subject=email_msg.subject,
+                                        source_type="attachment" if filename in [a[0] for a in email_msg.attachments] else "link",
+                                        pdf_path=pdf_path,
+                                        is_valid=info.is_valid
+                                    )
 
-                                # 保存到数据库（添加email_uid和email_account字段）
-                                invoice_dict = invoice.model_dump(by_alias=True, exclude=["id"])
-                                invoice_dict["email_uid"] = email_msg.uid  # 添加邮件UID
-                                invoice_dict["email_account"] = email_config.username  # 添加邮箱账号
+                                    # 保存到数据库（添加email_uid和email_account字段）
+                                    invoice_dict = invoice.model_dump(by_alias=True, exclude=["id"])
+                                    invoice_dict["email_uid"] = email_msg.uid  # 添加邮件UID
+                                    invoice_dict["email_account"] = email_config.username  # 添加邮箱账号
+                                    invoice_dict["pdf_hash"] = pdf_hash  # ⭐ 添加PDF哈希值
 
-                                await self.db.invoices.insert_one(invoice_dict)
+                                    await self.db.invoices.insert_one(invoice_dict)
 
-                                invoice_count += 1
-                                logger.info(f"成功提取发票: {info.invoice_number} - {info.seller_name}")
+                                    batch_invoice_count += 1
+                                    logger.info(f"成功提取发票: {info.invoice_number} - {info.seller_name}")
 
+                                except Exception as e:
+                                    logger.error(f"处理发票失败: {filename}, 错误: {e}", exc_info=True)
+                                    continue
+
+                            # ⭐ 处理完邮件后标记为已读
+                            try:
+                                client.mark_as_seen(email_msg.uid)
+                                logger.debug(f"邮件已标记为已读: {email_msg.uid}")
                             except Exception as e:
-                                logger.error(f"处理发票失败: {filename}, 错误: {e}", exc_info=True)
-                                continue
+                                logger.warning(f"标记邮件为已读失败: {e}")
+
+                        invoice_count += batch_invoice_count
+                        total_processed += len(emails)
+
+                        logger.info(f"本批次处理完成: 处理 {len(emails)} 封邮件，提取 {batch_invoice_count} 张发票")
+
+                        # 如果本批次邮件数少于 page_size，说明没有更多邮件了
+                        if len(emails) < page_size:
+                            logger.info(f"邮箱 {email_config.username} 所有邮件处理完成")
+                            break
+
+                        # 安全检查：避免无限循环
+                        if total_processed >= 500:
+                            logger.warning(f"邮箱 {email_config.username} 已处理 {total_processed} 封邮件，达到单次上限，停止处理")
+                            break
 
                 logger.info(f"邮箱 {email_config.username} 本次提取了 {invoice_count} 张发票")
                 total_invoice_count += invoice_count
@@ -220,7 +273,7 @@ class EmailService:
 
     async def process_all_users(self) -> dict:
         """
-        处理所有配置了邮箱的用户
+        处理所有配置了邮箱的用户（支持并发处理）
 
         Returns:
             处理结果统计
@@ -237,18 +290,41 @@ class EmailService:
 
         logger.info(f"找到 {len(users)} 个配置了邮箱的用户")
 
+        # 并发处理用户（限制并发数为10）
+        import asyncio
+        semaphore = asyncio.Semaphore(10)
+
+        async def process_with_semaphore(user_data):
+            """带信号量的用户处理"""
+            async with semaphore:
+                try:
+                    user = User(**user_data)
+                    count = await self.process_user_emails(user)
+                    return {"success": True, "count": count}
+                except Exception as e:
+                    logger.error(f"处理用户失败: {e}", exc_info=True)
+                    return {"success": False, "count": 0}
+
+        # 并发执行所有用户的处理
+        results = await asyncio.gather(
+            *[process_with_semaphore(user_data) for user_data in users],
+            return_exceptions=True
+        )
+
+        # 统计结果
         total_invoices = 0
         success_users = 0
         failed_users = 0
 
-        for user_data in users:
-            try:
-                user = User(**user_data)
-                count = await self.process_user_emails(user)
-                total_invoices += count
-                success_users += 1
-            except Exception as e:
-                logger.error(f"处理用户失败: {e}", exc_info=True)
+        for result in results:
+            if isinstance(result, dict):
+                if result["success"]:
+                    success_users += 1
+                    total_invoices += result["count"]
+                else:
+                    failed_users += 1
+            else:
+                # 异常情况
                 failed_users += 1
 
         result = {
