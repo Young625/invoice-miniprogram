@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 待添加的新功能
+
+### Changed
+- 待修改的功能
+
+### Fixed
+- 待修复的问题
+
+## [2.0.4] - 2026-03-05
+
+### Added
 - 发票项目分类功能
   - 后端：发票模型添加 project_name 字段
   - 后端：发票列表 API 支持项目筛选
@@ -16,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 前端：发票列表页面添加项目筛选器
   - 前端：发票详情页面显示项目类别
   - 前端：优化筛选器 UI 设计（卡片式布局）
+- 日志系统
+  - 日志配置模块（按日期轮转、自动压缩、按月份组织）
+  - 日志管理脚本（clean_logs.sh、view_logs.sh）
+  - 日志系统文档（LOGGING.md）
 - 数据库迁移脚本
   - migrate_project_name.py
   - migrate_project_name_optimized.py
@@ -35,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 改进中文字体注册逻辑
   - 优先使用 TTF 字体文件（避免 TTC 兼容性问题）
   - 增强字体加载的容错性
+  - 改进 Excel 生成逻辑
 - 优化小程序设置页面
   - 完善邮箱配置界面
   - 改进用户体验
@@ -46,9 +62,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 优化小程序详情页面
   - 添加项目类别显示
   - 优化样式
+- 优化小程序报销页面
+  - 改进 UI 和交互
+  - 优化样式和布局
 - 更新小程序配置
   - 添加更新检查防抖（5分钟）
-  - 版本号更新至 2.0.3
+  - 版本号更新至 2.0.4
+- 更新后端依赖包
 
 ### Security
 - 从 Git 跟踪中移除敏感配置文件
@@ -118,5 +138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 建立分支管理策略（main/develop）
 - 创建首个版本标签 v0.1.0
 
-[Unreleased]: https://github.com/Young625/invoice-miniprogram/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Young625/invoice-miniprogram/compare/v2.0.4...HEAD
+[2.0.4]: https://github.com/Young625/invoice-miniprogram/compare/v0.2.0...v2.0.4
+[0.2.0]: https://github.com/Young625/invoice-miniprogram/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Young625/invoice-miniprogram/releases/tag/v0.1.0
