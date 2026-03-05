@@ -6,14 +6,13 @@ import logging
 
 from app.core.config import settings
 from app.core.database import Database
+from app.core.logging_config import setup_logging
 from app.api import auth, invoice, user, reimbursement
 from app.services.scheduler_service import scheduler_service
 
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# 配置日志系统
+# 按日期轮转,自动压缩为ZIP,按月份组织
+setup_logging(base_dir='logs', log_level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

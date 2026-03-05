@@ -12,8 +12,8 @@ conda activate invoice-backend
 # 创建日志目录
 mkdir -p logs
 
-# 启动服务
-nohup uvicorn main:app --host 0.0.0.0 --port 8000 > logs/nohup.log 2>&1 &
+# 启动服务（使用 >> 追加日志，保留历史记录）
+nohup uvicorn main:app --host 0.0.0.0 --port 8000 >> logs/nohup.log 2>&1 &
 
 # 获取进程 ID
 PID=$!
