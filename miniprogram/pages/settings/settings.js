@@ -236,10 +236,27 @@ Page({
   // 选择头像
   onChooseAvatar(e) {
     const { avatarUrl } = e.detail
-    this.setData({
-      'tempUserInfo.avatar_url': avatarUrl
+    console.log('选择的头像临时路径:', avatarUrl)
+
+    // 将图片转换为 base64
+    wx.getFileSystemManager().readFile({
+      filePath: avatarUrl,
+      encoding: 'base64',
+      success: (res) => {
+        const base64 = 'data:image/jpeg;base64,' + res.data
+        this.setData({
+          'tempUserInfo.avatar_url': base64
+        })
+        console.log('头像已转换为 base64，长度:', base64.length)
+      },
+      fail: (err) => {
+        console.error('读取头像文件失败:', err)
+        wx.showToast({
+          title: '头像读取失败',
+          icon: 'none'
+        })
+      }
     })
-    console.log('选择的头像:', avatarUrl)
   },
 
   // 昵称输入
@@ -712,13 +729,15 @@ Page({
       })
     } catch (err) {
       console.error('更新自动同步状态失败', err)
+      console.error('错误详情:', err.message || err)
       // 如果失败，恢复原值
       this.setData({
         autoSyncEnabled: !newValue
       })
       wx.showToast({
-        title: '设置失败',
-        icon: 'none'
+        title: err.message || '设置失败，请重试',
+        icon: 'none',
+        duration: 3000
       })
     }
   },
