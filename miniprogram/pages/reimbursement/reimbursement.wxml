@@ -74,6 +74,19 @@
         />
       </view>
       <view class="form-item">
+        <text class="form-label">OA报销单号<text class="optional-hint">（选填）</text></text>
+        <textarea
+          class="form-input-single"
+          placeholder-class="input-placeholder"
+          placeholder="请输入OA报销单号"
+          value="{{oaNumber}}"
+          bindinput="onOaNumberInput"
+          auto-height="{{false}}"
+          show-confirm-bar="{{true}}"
+          maxlength="50"
+        />
+      </view>
+      <view class="form-item">
         <text class="form-label">报销事由<text class="optional-hint">（选填）</text></text>
         <textarea
           class="form-textarea"

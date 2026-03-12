@@ -65,12 +65,13 @@ class ReimbursementService:
         except Exception as e:
             logger.error(f"字体注册过程出错: {e}")
 
-    def generate_excel_summary(self, invoices: List[Dict[str, Any]]) -> bytes:
+    def generate_excel_summary(self, invoices: List[Dict[str, Any]], user_info: Dict[str, Any] = None) -> bytes:
         """
         生成发票汇总表 Excel
 
         Args:
-            invoices: 发票列表
+            invoices: 发票列表（已按 items 排序）
+            user_info: 用户信息（包含报销人、OA报销单号等）
 
         Returns:
             Excel 文件的字节内容
@@ -80,19 +81,26 @@ class ReimbursementService:
         ws.title = "发票汇总表"
 
         # 设置列宽
-        ws.column_dimensions['A'].width = 8
-        ws.column_dimensions['B'].width = 20
-        ws.column_dimensions['C'].width = 18
-        ws.column_dimensions['D'].width = 25
-        ws.column_dimensions['E'].width = 15
-        ws.column_dimensions['F'].width = 30
-        ws.column_dimensions['G'].width = 30
-        ws.column_dimensions['H'].width = 15
+        ws.column_dimensions['A'].width = 12  # 报销人
+        ws.column_dimensions['B'].width = 20  # OA报销单号
+        ws.column_dimensions['C'].width = 20  # 发票类型
+        ws.column_dimensions['D'].width = 18  # 发票代码
+        ws.column_dimensions['E'].width = 20  # 发票号码
+        ws.column_dimensions['F'].width = 15  # 开票日期
+        ws.column_dimensions['G'].width = 30  # 购买方名称
+        ws.column_dimensions['H'].width = 30  # 销售方名称
+        ws.column_dimensions['I'].width = 20  # 销售方税号
+        ws.column_dimensions['J'].width = 25  # 项目名称
+        ws.column_dimensions['K'].width = 15  # 发票金额(不含税)
+        ws.column_dimensions['L'].width = 12  # 发票税额
+        ws.column_dimensions['M'].width = 10  # 发票税率
+        ws.column_dimensions['N'].width = 12  # 合税金额
+        ws.column_dimensions['O'].width = 15  # 录入日期
 
         # 标题样式
-        title_font = Font(name='Arial', size=14, bold=True)
-        title_fill = PatternFill(start_color="1989FA", end_color="1989FA", fill_type="solid")
-        title_alignment = Alignment(horizontal='center', vertical='center')
+        title_font = Font(name='Arial', size=11, bold=True)
+        title_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+        title_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
 
         # 边框样式
         thin_border = Border(
@@ -103,7 +111,12 @@ class ReimbursementService:
         )
 
         # 表头
-        headers = ['序号', '发票类型', '发票代码', '发票号码', '开票日期', '购买方名称', '销售方名称', '金额（元）']
+        headers = [
+            '报销人', 'OA报销单号', '发票类型', '发票代码', '发票号码',
+            '开票日期', '购买方名称', '销售方名称', '销售方税号', '项目名称',
+            '发票金额(不含税)', '发票税额', '发票税率', '合税金额', '录入日期'
+        ]
+
         for col_num, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col_num, value=header)
             cell.font = title_font
@@ -113,23 +126,81 @@ class ReimbursementService:
 
         # 数据行
         total_amount = 0
-        for row_num, invoice in enumerate(invoices, 2):
-            ws.cell(row=row_num, column=1, value=row_num - 1).border = thin_border
-            ws.cell(row=row_num, column=2, value=invoice.get('invoice_type', '')).border = thin_border
-            ws.cell(row=row_num, column=3, value=invoice.get('invoice_code', '')).border = thin_border
-            ws.cell(row=row_num, column=4, value=invoice.get('invoice_number', '')).border = thin_border
-            ws.cell(row=row_num, column=5, value=invoice.get('invoice_date', '')).border = thin_border
-            ws.cell(row=row_num, column=6, value=invoice.get('buyer_name', '')).border = thin_border
-            ws.cell(row=row_num, column=7, value=invoice.get('seller_name', '')).border = thin_border
+        total_tax = 0
+        total_with_tax = 0
 
-            amount = invoice.get('total_amount', 0) or 0
-            ws.cell(row=row_num, column=8, value=amount).border = thin_border
+        for row_num, invoice in enumerate(invoices, 2):
+            # 报销人
+            ws.cell(row=row_num, column=1, value=user_info.get('name', '') if user_info else '').border = thin_border
+
+            # OA报销单号
+            ws.cell(row=row_num, column=2, value=user_info.get('oa_number', '') if user_info else '').border = thin_border
+
+            # 发票类型
+            ws.cell(row=row_num, column=3, value=invoice.get('invoice_type', '')).border = thin_border
+
+            # 发票代码
+            ws.cell(row=row_num, column=4, value=invoice.get('invoice_code', '')).border = thin_border
+
+            # 发票号码
+            ws.cell(row=row_num, column=5, value=invoice.get('invoice_number', '')).border = thin_border
+
+            # 开票日期
+            ws.cell(row=row_num, column=6, value=invoice.get('invoice_date', '')).border = thin_border
+
+            # 购买方名称
+            ws.cell(row=row_num, column=7, value=invoice.get('buyer_name', '')).border = thin_border
+
+            # 销售方名称
+            ws.cell(row=row_num, column=8, value=invoice.get('seller_name', '')).border = thin_border
+
+            # 销售方税号
+            ws.cell(row=row_num, column=9, value=invoice.get('seller_tax_id', '')).border = thin_border
+
+            # 项目名称（items 列表转换为字符串）
+            items = invoice.get('items', [])
+            project_name_str = ', '.join(items) if items else ''
+            ws.cell(row=row_num, column=10, value=project_name_str).border = thin_border
+
+            # 发票金额(不含税)
+            amount = invoice.get('amount', 0) or 0
+            ws.cell(row=row_num, column=11, value=amount).border = thin_border
             total_amount += amount
+
+            # 发票税额
+            tax_amount = invoice.get('tax_amount', 0) or 0
+            ws.cell(row=row_num, column=12, value=tax_amount).border = thin_border
+            total_tax += tax_amount
+
+            # 发票税率（写入数值 0.03，格式设为百分比，Excel 显示 3%）
+            tax_rate = invoice.get('tax_rate')
+            tax_rate_cell = ws.cell(row=row_num, column=13, value=tax_rate / 100 if tax_rate is not None else None)
+            tax_rate_cell.number_format = '0%'
+            tax_rate_cell.border = thin_border
+
+            # 合税金额（价税合计）
+            total_amt = invoice.get('total_amount', 0) or 0
+            ws.cell(row=row_num, column=14, value=total_amt).border = thin_border
+            total_with_tax += total_amt
+
+            # 录入日期
+            created_at = invoice.get('created_at', '')
+            if created_at:
+                # 如果是 datetime 对象，转换为字符串
+                if hasattr(created_at, 'strftime'):
+                    created_at = created_at.strftime('%Y-%m-%d')
+                elif isinstance(created_at, str):
+                    # 如果是字符串，尝试提取日期部分
+                    created_at = created_at.split('T')[0] if 'T' in created_at else created_at[:10]
+            ws.cell(row=row_num, column=15, value=created_at).border = thin_border
 
         # 合计行
         summary_row = len(invoices) + 2
-        ws.cell(row=summary_row, column=7, value='合计：').font = Font(bold=True)
-        ws.cell(row=summary_row, column=8, value=total_amount).font = Font(bold=True, color="FF0000")
+        ws.cell(row=summary_row, column=10, value='合计：').font = Font(bold=True)
+        ws.cell(row=summary_row, column=11, value=total_amount).font = Font(bold=True, color="FF0000")
+        ws.cell(row=summary_row, column=12, value=total_tax).font = Font(bold=True, color="FF0000")
+        # 税率列不需要合计
+        ws.cell(row=summary_row, column=14, value=total_with_tax).font = Font(bold=True, color="FF0000")
 
         # 保存到字节流
         output = io.BytesIO()
@@ -343,11 +414,20 @@ class ReimbursementService:
         Returns:
             ZIP 文件的字节内容
         """
+        # 按 items 排序发票（确保所有文件都使用相同的排序）
+        def get_sort_key(invoice):
+            items = invoice.get('items', [])
+            if not items:
+                return 'zzz'  # 空 items 排在最后
+            return ', '.join(items)
+
+        invoices = sorted(invoices, key=get_sort_key)
+
         zip_buffer = io.BytesIO()
 
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             # 1. 添加 Excel 汇总表
-            excel_data = self.generate_excel_summary(invoices)
+            excel_data = self.generate_excel_summary(invoices, user_info)
             zip_file.writestr('发票汇总表.xlsx', excel_data)
             logger.info("已添加 Excel 汇总表")
 

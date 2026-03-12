@@ -8,6 +8,7 @@ Page({
     totalAmount: 0,
     name: '',
     department: '',
+    oaNumber: '',
     reason: '',
     loading: false
   },
@@ -37,8 +38,17 @@ Page({
         })
       )
 
-      const invoices = await Promise.all(promises)
+      let invoices = await Promise.all(promises)
       console.log('加载的发票数据:', invoices)
+
+      // 按 items 排序发票
+      invoices = invoices.sort((a, b) => {
+        const aItems = a.items || []
+        const bItems = b.items || []
+        const aKey = aItems.length > 0 ? aItems.join(', ') : 'zzz'
+        const bKey = bItems.length > 0 ? bItems.join(', ') : 'zzz'
+        return aKey.localeCompare(bKey)
+      })
 
       const totalAmount = invoices.reduce((sum, inv) => {
         console.log('发票金额:', inv.total_amount)
@@ -72,6 +82,10 @@ Page({
     this.setData({ department: e.detail.value })
   },
 
+  onOaNumberInput(e) {
+    this.setData({ oaNumber: e.detail.value })
+  },
+
   onReasonInput(e) {
     this.setData({ reason: e.detail.value })
   },
@@ -98,6 +112,10 @@ Page({
 
       if (this.data.department && this.data.department.trim()) {
         requestData.department = this.data.department.trim()
+      }
+
+      if (this.data.oaNumber && this.data.oaNumber.trim()) {
+        requestData.oa_number = this.data.oaNumber.trim()
       }
 
       if (this.data.reason && this.data.reason.trim()) {
@@ -180,7 +198,8 @@ Page({
           title: '分享成功',
           icon: 'success'
         })
-        // 返回列表页
+        // 标记列表页需要刷新，返回后自动更新已导出状态
+        getApp().globalData.needRefreshInvoiceList = true
         setTimeout(() => {
           wx.navigateBack()
         }, 1500)
@@ -207,7 +226,8 @@ Page({
           title: '已保存到收藏',
           icon: 'success'
         })
-        // 返回列表页
+        // 标记列表页需要刷新，返回后自动更新已导出状态
+        getApp().globalData.needRefreshInvoiceList = true
         setTimeout(() => {
           wx.navigateBack()
         }, 1500)
@@ -227,21 +247,21 @@ Page({
 
     console.log('使用备用保存方案，系统平台:', systemInfo.platform)
 
-    if (isIOS) {
-      // iOS系统：使用 saveFileToDisk 保存到文件
-      wx.saveFileToDisk({
-        filePath: filePath,
-        success: () => {
-          wx.showToast({
-            title: '保存成功',
-            icon: 'success'
-          })
-          setTimeout(() => {
-            wx.navigateBack()
-          }, 1500)
-        },
-        fail: (err) => {
-          console.error('iOS保存文件失败', err)
+    wx.saveFileToDisk({
+      filePath: filePath,
+      success: () => {
+        wx.showToast({
+          title: '保存成功',
+          icon: 'success'
+        })
+        getApp().globalData.needRefreshInvoiceList = true
+        setTimeout(() => {
+          wx.navigateBack()
+        }, 1500)
+      },
+      fail: (err) => {
+        console.error('保存文件失败', err)
+        if (isIOS) {
           wx.showModal({
             title: '提示',
             content: '保存失败，请使用分享功能发送到微信或其他应用',
@@ -253,30 +273,14 @@ Page({
               }
             }
           })
-        }
-      })
-    } else {
-      // Android系统：使用 saveFileToDisk
-      wx.saveFileToDisk({
-        filePath: filePath,
-        success: () => {
-          wx.showToast({
-            title: '保存成功',
-            icon: 'success'
-          })
-          setTimeout(() => {
-            wx.navigateBack()
-          }, 1500)
-        },
-        fail: (err) => {
-          console.error('Android保存文件失败', err)
+        } else {
           wx.showToast({
             title: '保存失败',
             icon: 'none'
           })
         }
-      })
-    }
+      }
+    })
   },
 
   // 分享小程序

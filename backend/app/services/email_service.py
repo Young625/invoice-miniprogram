@@ -31,7 +31,7 @@ class EmailService:
         self.db = db
         self.parser = InvoiceParser()
 
-    async def process_user_emails(self, user: User) -> int:
+    async def process_user_emails(self, user: User) -> dict:
         """
         处理单个用户的邮箱（支持多邮箱）
 
@@ -39,13 +39,19 @@ class EmailService:
             user: 用户对象
 
         Returns:
-            提取到的发票数量
+            dict: {
+                "success_count": 成功提取的发票数量,
+                "duplicate_count": 重复跳过的发票数量,
+                "duplicate_invoices": [重复发票的详细信息列表]
+            }
         """
         if not user.email_configs or len(user.email_configs) == 0:
             logger.warning(f"用户 {user.openid} 未配置邮箱")
-            return 0
+            return {"success_count": 0, "duplicate_count": 0, "duplicate_invoices": []}
 
         total_invoice_count = 0
+        total_duplicate_count = 0
+        duplicate_invoices = []  # 记录重复的发票信息
 
         # 遍历处理所有邮箱配置
         for idx, email_config in enumerate(user.email_configs):
@@ -137,17 +143,36 @@ class EmailService:
 
                                     if existing_by_hash:
                                         logger.info(f"PDF文件已存在（哈希重复）: {pdf_hash[:8]}...")
+                                        total_duplicate_count += 1
+                                        duplicate_invoices.append({
+                                            "invoice_number": info.invoice_number or "未识别",
+                                            "seller_name": info.seller_name or "未识别",
+                                            "reason": "PDF文件重复"
+                                        })
                                         continue
 
-                                    # 检查2：发票号码去重
+                                    # 检查2：发票号码全局去重（发票号码在整个系统中唯一）
                                     if info.invoice_number:
                                         existing_invoice = await self.db.invoices.find_one({
-                                            "user_id": user.openid,
                                             "invoice_number": info.invoice_number
                                         })
 
                                         if existing_invoice:
-                                            logger.info(f"发票号码重复: {info.invoice_number}")
+                                            # 获取已拥有该发票的用户信息
+                                            existing_user_id = existing_invoice.get("user_id")
+                                            if existing_user_id == user.openid:
+                                                logger.info(f"发票号码重复（本人已有）: {info.invoice_number}")
+                                                reason = "您已添加过此发票"
+                                            else:
+                                                logger.info(f"发票号码重复（其他用户已有）: {info.invoice_number}, 所属用户: {existing_user_id}")
+                                                reason = "此发票已被其他用户添加"
+
+                                            total_duplicate_count += 1
+                                            duplicate_invoices.append({
+                                                "invoice_number": info.invoice_number,
+                                                "seller_name": info.seller_name or "未识别",
+                                                "reason": reason
+                                            })
                                             continue
 
                                     # ⭐ 所有检查通过后，才保存PDF文件
@@ -216,6 +241,7 @@ class EmailService:
                                         seller_tax_id=info.seller_tax_id,
                                         amount=amount,
                                         tax_amount=tax_amount,
+                                        tax_rate=float(info.tax_rate) if info.tax_rate else None,
                                         total_amount=total_amount,
                                         items=info.items,
                                         project_name=project_name,
@@ -231,10 +257,24 @@ class EmailService:
                                     invoice_dict["email_account"] = email_config.username  # 添加邮箱账号
                                     invoice_dict["pdf_hash"] = pdf_hash  # ⭐ 添加PDF哈希值
 
-                                    await self.db.invoices.insert_one(invoice_dict)
-
-                                    batch_invoice_count += 1
-                                    logger.info(f"成功提取发票: {info.invoice_number} - {info.seller_name}")
+                                    try:
+                                        await self.db.invoices.insert_one(invoice_dict)
+                                        batch_invoice_count += 1
+                                        logger.info(f"成功提取发票: {info.invoice_number} - {info.seller_name}")
+                                    except Exception as insert_err:
+                                        # 捕获唯一索引冲突错误（DuplicateKeyError）
+                                        if "duplicate key error" in str(insert_err).lower() or "E11000" in str(insert_err):
+                                            logger.warning(f"发票号码 {info.invoice_number} 插入失败：已被其他用户添加（数据库唯一索引冲突）")
+                                            total_duplicate_count += 1
+                                            duplicate_invoices.append({
+                                                "invoice_number": info.invoice_number or "未识别",
+                                                "seller_name": info.seller_name or "未识别",
+                                                "reason": "此发票已被其他用户添加"
+                                            })
+                                        else:
+                                            # 其他插入错误，记录日志
+                                            logger.error(f"插入发票失败: {info.invoice_number}, 错误: {insert_err}", exc_info=True)
+                                            raise
 
                                 except Exception as e:
                                     logger.error(f"处理发票失败: {filename}, 错误: {e}", exc_info=True)
@@ -269,8 +309,12 @@ class EmailService:
                 logger.error(f"处理邮箱 {email_config.username} 失败: {e}", exc_info=True)
                 continue
 
-        logger.info(f"用户 {user.openid} 所有邮箱共提取了 {total_invoice_count} 张发票")
-        return total_invoice_count
+        logger.info(f"用户 {user.openid} 所有邮箱共提取了 {total_invoice_count} 张发票，跳过 {total_duplicate_count} 张重复发票")
+        return {
+            "success_count": total_invoice_count,
+            "duplicate_count": total_duplicate_count,
+            "duplicate_invoices": duplicate_invoices
+        }
 
     def _save_pdf(self, user_id: str, filename: str, pdf_data: bytes) -> str:
         """
@@ -335,11 +379,12 @@ class EmailService:
             async with semaphore:
                 try:
                     user = User(**user_data)
-                    count = await self.process_user_emails(user)
-                    return {"success": True, "count": count}
+                    result = await self.process_user_emails(user)
+                    # result 现在是一个字典: {"success_count": int, "duplicate_count": int, "duplicate_invoices": list}
+                    return {"success": True, "invoice_result": result}
                 except Exception as e:
                     logger.error(f"处理用户失败: {e}", exc_info=True)
-                    return {"success": False, "count": 0}
+                    return {"success": False, "invoice_result": {"success_count": 0, "duplicate_count": 0, "duplicate_invoices": []}}
 
         # 并发执行所有用户的处理
         results = await asyncio.gather(
@@ -349,6 +394,7 @@ class EmailService:
 
         # 统计结果
         total_invoices = 0
+        total_duplicates = 0
         success_users = 0
         failed_users = 0
 
@@ -356,7 +402,9 @@ class EmailService:
             if isinstance(result, dict):
                 if result["success"]:
                     success_users += 1
-                    total_invoices += result["count"]
+                    invoice_result = result["invoice_result"]
+                    total_invoices += invoice_result["success_count"]
+                    total_duplicates += invoice_result["duplicate_count"]
                 else:
                     failed_users += 1
             else:
@@ -367,7 +415,8 @@ class EmailService:
             "total_users": len(users),
             "success_users": success_users,
             "failed_users": failed_users,
-            "total_invoices": total_invoices
+            "total_invoices": total_invoices,
+            "total_duplicates": total_duplicates
         }
 
         logger.info(f"邮箱处理完成: {result}")

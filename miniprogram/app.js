@@ -10,7 +10,7 @@ App({
     // apiBase: 'http://192.168.0.17:8000/api',
 
     // 版本号（每次发版时更新）
-    version: '2.0.4',
+    version: '2.0.5',
 
     // 上次检查更新的时间戳
     lastUpdateCheckTime: 0
@@ -101,7 +101,7 @@ App({
     } catch (err) {
       console.error('获取用户信息失败', err)
       // 如果获取失败，清除 token
-      if (err.message === '未授权') {
+      if (err.message === '未授权' || err.statusCode === 401) {
         this.globalData.token = null
         this.globalData.userInfo = null
         wx.removeStorageSync('token')
@@ -131,9 +131,14 @@ App({
             wx.redirectTo({
               url: '/pages/login/login'
             })
-            reject(new Error('未授权'))
+            reject({ message: '未授权', statusCode: 401 })
           } else {
-            reject(new Error(res.data.detail || '请求失败'))
+            // 保留完整的响应数据，方便前端获取详细错误信息
+            reject({
+              message: res.data.detail || '请求失败',
+              statusCode: res.statusCode,
+              data: res.data
+            })
           }
         },
         fail: (err) => {

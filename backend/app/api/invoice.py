@@ -202,10 +202,27 @@ async def sync_invoices(
     email_service = EmailService(db)
 
     try:
-        count = await email_service.process_user_emails(current_user)
+        result = await email_service.process_user_emails(current_user)
+
+        # 构建友好的提示消息
+        success_count = result["success_count"]
+        duplicate_count = result["duplicate_count"]
+        duplicate_invoices = result["duplicate_invoices"]
+
+        message_parts = []
+        if success_count > 0:
+            message_parts.append(f"成功同步 {success_count} 张发票")
+        else:
+            message_parts.append("未发现新发票")
+
+        if duplicate_count > 0:
+            message_parts.append(f"跳过 {duplicate_count} 张重复发票")
+
         return {
-            "message": "同步完成",
-            "invoice_count": count
+            "message": "，".join(message_parts),
+            "success_count": success_count,
+            "duplicate_count": duplicate_count,
+            "duplicate_invoices": duplicate_invoices[:10]  # 最多返回10条重复信息
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"同步失败: {str(e)}")

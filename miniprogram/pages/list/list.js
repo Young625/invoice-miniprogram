@@ -16,10 +16,12 @@ Page({
     hasMore: true,
     types: [
       { value: '', label: '全部类型' },
+      { value: '电子发票（普通发票）', label: '电子发票（普通发票）' },
+      { value: '电子发票（铁路电子客票）', label: '电子发票（铁路电子客票）' },
+      { value: '电子发票（增值税专用发票）', label: '电子发票（增值税专用发票）' },
+      { value: '通用（电子）发票', label: '通用（电子）发票' },
       { value: '增值税电子普通发票', label: '增值税电子普通发票' },
-      { value: '增值税电子专用发票', label: '增值税电子专用发票' },
-      { value: '增值税普通发票', label: '增值税普通发票' },
-      { value: '增值税专用发票', label: '增值税专用发票' }
+      { value: '其他', label: '其他' }
     ],
     typeIndex: 0,
     // 固定的项目列表
@@ -84,14 +86,15 @@ Page({
       this.setData({ isGuest: true })
     }
 
-    // 从报销包页面返回时，清空选择状态
-    // 但不刷新数据，避免重复加载
-    if (this.data.selectedIds.length > 0) {
+    // 从报销包页面返回时，清空选择状态并刷新列表（已导出状态需要更新）
+    if (this.data.selectedIds.length > 0 || app.globalData.needRefreshInvoiceList) {
+      app.globalData.needRefreshInvoiceList = false
       this.setData({
         selectedIds: [],
         selectedMap: {},
         isAllSelected: false
       })
+      this.refreshData()
     }
   },
 
@@ -278,7 +281,20 @@ Page({
       this.showLoginGuide()
       return
     }
+
     const id = e.currentTarget.dataset.id
+    const isExported = e.currentTarget.dataset.exported
+
+    // 如果发票已导出，不允许选择
+    if (isExported) {
+      wx.showToast({
+        title: '该发票已导出',
+        icon: 'none',
+        duration: 1500
+      })
+      return
+    }
+
     console.log('选择发票 ID:', id)
     console.log('当前选中列表:', this.data.selectedIds)
 
@@ -301,7 +317,7 @@ Page({
     this.setData({
       selectedIds: selectedIds,
       selectedMap: selectedMap,
-      isAllSelected: selectedIds.length === this.data.invoices.length
+      isAllSelected: selectedIds.length === this.data.invoices.filter(inv => !inv.is_exported).length
     }, () => {
       console.log('setData 完成，新的 selectedIds:', this.data.selectedIds)
       console.log('setData 完成，新的 selectedMap:', this.data.selectedMap)
@@ -322,8 +338,10 @@ Page({
         isAllSelected: false
       })
     } else {
-      // 全选
-      const allIds = this.data.invoices.map(item => item.id)
+      // 全选（只选择未导出的发票）
+      const allIds = this.data.invoices
+        .filter(item => !item.is_exported)
+        .map(item => item.id)
       const selectedMap = {}
       allIds.forEach(id => {
         selectedMap[id] = true
@@ -359,9 +377,34 @@ Page({
       return
     }
 
-    const idsParam = this.data.selectedIds.join(',')
+    // 检测选中的发票中是否有已导出的
+    const exportedInvoices = this.data.invoices.filter(
+      inv => this.data.selectedMap[inv.id] && inv.is_exported
+    )
 
-    // 跳转到报销包生成页面
+    if (exportedInvoices.length > 0) {
+      const names = exportedInvoices.map(inv =>
+        inv.seller_name || inv.invoice_number || '未知发票'
+      ).join('、')
+      wx.showModal({
+        title: '包含已导出发票',
+        content: `以下发票已导出过：${names}，是否继续生成？`,
+        confirmText: '继续',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            this._navigateToReimbursement()
+          }
+        }
+      })
+      return
+    }
+
+    this._navigateToReimbursement()
+  },
+
+  _navigateToReimbursement() {
+    const idsParam = this.data.selectedIds.join(',')
     wx.navigateTo({
       url: `/pages/reimbursement/reimbursement?ids=${idsParam}`
     })

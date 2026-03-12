@@ -108,11 +108,12 @@
   <view class="invoice-list">
     <view wx:if="{{invoices.length > 0}}">
       <view
-        class="invoice-item"
+        class="invoice-item {{item.is_exported ? 'disabled' : ''}}"
         wx:for="{{invoices}}"
         wx:key="id"
         bindtap="onSelectInvoice"
         data-id="{{item.id}}"
+        data-exported="{{item.is_exported}}"
       >
         <!-- 复选框 -->
         <view class="invoice-checkbox">
@@ -126,6 +127,7 @@
           <view class="invoice-left">
             <view class="invoice-type-tag">{{item.invoice_type || '电子发票'}}</view>
             <view wx:if="{{item.project_name}}" class="invoice-project-tag">{{item.project_name}}</view>
+            <view wx:if="{{item.is_exported}}" class="invoice-exported-tag">已导出</view>
             <view class="invoice-info">
               <text class="invoice-seller">{{item.seller_name || '未知'}}</text>
               <text class="invoice-number">{{item.invoice_number}}</text>

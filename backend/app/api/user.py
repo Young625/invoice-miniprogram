@@ -3,6 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import datetime
 import logging
+import imaplib
+import ssl
+import asyncio
 
 from ..core.database import get_database
 from ..models.user import User, EmailConfig
@@ -13,6 +16,44 @@ logger = logging.getLogger(__name__)
 
 # 邮箱配置数量限制
 MAX_EMAIL_CONFIGS = 3
+
+
+def _verify_imap_connection(config: EmailConfig) -> None:
+    """
+    尝试 IMAP 连接验证邮箱配置是否正确。
+    连接失败时抛出 HTTPException。
+    """
+    try:
+        ctx = ssl.create_default_context()
+        with imaplib.IMAP4_SSL(config.imap_server, config.imap_port, ssl_context=ctx) as conn:
+            conn.login(config.username, config.auth_code)
+    except imaplib.IMAP4.error as e:
+        # 所有 IMAP 错误都统一处理，不暴露技术细节
+        logger.error(f"IMAP 登录失败: {str(e)}")
+
+        # 根据邮箱类型给出不同的提示
+        if config.email_type == "custom":
+            raise HTTPException(
+                status_code=400,
+                detail="邮箱验证失败，请检查邮箱账号、授权码或IMAP服务器配置是否正确"
+            )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="邮箱验证失败，请检查邮箱账号或授权码是否正确"
+            )
+    except (OSError, ConnectionRefusedError, TimeoutError) as e:
+        logger.error(f"连接邮箱服务器失败: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"无法连接到邮箱服务器，请检查网络连接或IMAP服务器配置"
+        )
+    except Exception as e:
+        logger.error(f"邮箱验证异常: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail="邮箱验证失败，请检查配置是否正确"
+        )
 
 
 @router.get("/email-configs")
@@ -67,6 +108,11 @@ async def add_email_config(
             status_code=400,
             detail="该邮箱已被其他用户绑定"
         )
+
+    # 验证 IMAP 连接（确认账号和授权码正确）
+    logger.info(f"验证邮箱 IMAP 连接: {config.username}")
+    await asyncio.get_event_loop().run_in_executor(None, _verify_imap_connection, config)
+    logger.info(f"邮箱 {config.username} IMAP 验证通过")
 
     # 添加新邮箱配置
     result = await db.users.update_one(
@@ -132,6 +178,11 @@ async def update_email_config(
                 status_code=400,
                 detail="该邮箱已被其他用户绑定"
             )
+
+    # 验证 IMAP 连接（确认账号和授权码正确）
+    logger.info(f"验证邮箱 IMAP 连接: {config.username}")
+    await asyncio.get_event_loop().run_in_executor(None, _verify_imap_connection, config)
+    logger.info(f"邮箱 {config.username} IMAP 验证通过")
 
     # 更新邮箱配置
     result = await db.users.update_one(

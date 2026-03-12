@@ -318,7 +318,7 @@ Page({
       console.error('保存用户信息失败:', err)
       wx.hideLoading()
       wx.showToast({
-        title: err.data?.detail || '保存失败',
+        title: err.data?.detail || err.message || '保存失败',
         icon: 'none'
       })
     }
@@ -479,11 +479,12 @@ Page({
       }
     }
 
-    wx.showLoading({ title: '保存中...' })
+    wx.showLoading({ title: '验证邮箱中...' })
 
     try {
       // 构建完整的配置数据
       const configData = {
+        email_type: emailForm.email_type,  // 添加邮箱类型
         imap_server: emailForm.email_type === 'custom'
           ? emailForm.custom_imap_server
           : currentProvider.imap_server,
@@ -519,7 +520,7 @@ Page({
 
       wx.hideLoading()
       wx.showToast({
-        title: '保存成功',
+        title: '验证通过，保存成功',
         icon: 'success'
       })
 
@@ -539,8 +540,12 @@ Page({
       wx.hideLoading()
 
       // 显示实际的错误信息
-      const errorMsg = err.data?.detail || err.errMsg || '保存失败，请检查网络连接'
+      // err.data.detail 是后端返回的详细错误信息
+      // err.message 是封装后的错误消息
+      const errorMsg = err.data?.detail || err.message || '保存失败，请检查网络连接'
       console.log('错误信息:', errorMsg)
+
+      // 统一使用 Toast 显示错误信息
       wx.showToast({
         title: errorMsg,
         icon: 'none',
@@ -676,16 +681,34 @@ Page({
 
       wx.hideLoading()
 
-      const invoiceCount = result.invoice_count || 0
-      if (invoiceCount > 0) {
+      const successCount = result.success_count || 0
+      const duplicateCount = result.duplicate_count || 0
+      const duplicateInvoices = result.duplicate_invoices || []
+
+      // 构建提示消息
+      let message = result.message || '同步完成'
+
+      // 如果有重复发票，显示详细信息
+      if (duplicateCount > 0 && duplicateInvoices.length > 0) {
+        const duplicateDetails = duplicateInvoices.map(inv =>
+          `发票号码：${inv.invoice_number}\n原因：${inv.reason}`
+        ).join('\n\n')
+
+        wx.showModal({
+          title: '同步完成',
+          content: `${message}\n\n重复发票详情：\n${duplicateDetails}`,
+          showCancel: false,
+          confirmText: '我知道了'
+        })
+      } else if (successCount > 0) {
         wx.showToast({
-          title: `同步成功，提取了 ${invoiceCount} 张发票`,
+          title: message,
           icon: 'success',
           duration: 2000
         })
       } else {
         wx.showToast({
-          title: '同步完成，暂无新发票',
+          title: message,
           icon: 'none',
           duration: 2000
         })
@@ -694,7 +717,7 @@ Page({
       console.error('同步失败:', err)
       wx.hideLoading()
       wx.showToast({
-        title: err.data?.detail || '同步失败',
+        title: err.data?.detail || err.message || '同步失败',
         icon: 'none',
         duration: 2000
       })

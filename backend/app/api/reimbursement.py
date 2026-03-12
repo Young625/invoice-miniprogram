@@ -19,6 +19,7 @@ class ReimbursementRequest(BaseModel):
     invoice_ids: List[str]
     name: str = None
     department: str = None
+    oa_number: str = None
     reason: str = None
 
 
@@ -66,6 +67,7 @@ async def generate_reimbursement_package(
     user_info = {
         "name": request.name,
         "department": request.department,
+        "oa_number": request.oa_number,
         "reason": request.reason
     }
 
@@ -80,6 +82,12 @@ async def generate_reimbursement_package(
             invoices=invoices,
             user_info=user_info,
             pdf_dir=str(pdf_base_dir)
+        )
+
+        # 标记所有发票为已导出
+        await db.invoices.update_many(
+            {"_id": {"$in": invoice_object_ids}},
+            {"$set": {"is_exported": True}}
         )
 
         # 返回 ZIP 文件

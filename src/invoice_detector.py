@@ -58,6 +58,14 @@ PDF_INVOICE_MARKERS = [
 # 至少匹配的标志数量才确认为发票
 PDF_MIN_MARKER_COUNT = 3
 
+# 排除标志：包含这些关键词的 PDF 是汇总单/清单，不是单张发票
+PDF_EXCLUSION_MARKERS = [
+    "汇总单",       # 发票（票据）汇总单、收费公路通行费电子票据汇总单
+    "票据汇总",     # 兜底
+    "发票清单",     # 发票清单
+    "行程单汇总",
+]
+
 
 def check_email_keywords(subject: str, body: str) -> bool:
     """第一级检测：邮件主题或正文中是否包含发票相关关键词。
@@ -99,6 +107,12 @@ def check_pdf_is_invoice(pdf_data: bytes) -> bool:
             if not full_text.strip():
                 logger.debug("PDF 无法提取文本，可能是扫描件")
                 return False
+
+            # 排除汇总单/清单类 PDF（包含多张发票的汇总，不是单张发票）
+            for exclusion in PDF_EXCLUSION_MARKERS:
+                if exclusion in full_text:
+                    logger.info("PDF 包含排除标志 '%s'，跳过（汇总单/清单）", exclusion)
+                    return False
 
             matched_markers = []
             for marker in PDF_INVOICE_MARKERS:

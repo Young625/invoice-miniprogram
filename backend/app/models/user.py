@@ -34,6 +34,7 @@ class EmailConfig(BaseModel):
     username: str
     auth_code: str  # 授权码
     folder: str = "INBOX"
+    email_type: Optional[str] = None  # 邮箱类型：qq, 163, 126, gmail, outlook, custom
 
 
 class User(BaseModel):

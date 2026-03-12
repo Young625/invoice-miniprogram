@@ -28,6 +28,7 @@ class Invoice(BaseModel):
     # 金额信息
     amount: Optional[float] = None  # 金额
     tax_amount: Optional[float] = None  # 税额
+    tax_rate: Optional[float] = None  # 税率（如：13、9、6、3，不含税为0）
     total_amount: Optional[float] = None  # 价税合计
 
     # 商品信息

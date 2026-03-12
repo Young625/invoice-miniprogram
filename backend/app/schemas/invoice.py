@@ -1,7 +1,21 @@
 """发票相关的数据模式"""
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+
+# 东八区时区
+TIMEZONE_OFFSET = timezone(timedelta(hours=8))
+
+
+def datetime_to_local_str(dt: datetime) -> str:
+    """将 UTC datetime 转为东八区字符串"""
+    if dt.tzinfo is None:
+        # 如果是 naive datetime，假设是 UTC
+        dt = dt.replace(tzinfo=timezone.utc)
+    # 转为东八区
+    local_dt = dt.astimezone(TIMEZONE_OFFSET)
+    return local_dt.isoformat()
 
 
 class InvoiceResponse(BaseModel):
@@ -17,6 +31,7 @@ class InvoiceResponse(BaseModel):
     seller_tax_id: Optional[str] = None
     amount: Optional[float] = None
     tax_amount: Optional[float] = None
+    tax_rate: Optional[float] = None
     total_amount: Optional[float] = None
     items: List[str] = []
     email_subject: Optional[str] = None
@@ -30,6 +45,10 @@ class InvoiceResponse(BaseModel):
         populate_by_name = True
         # 关键配置：序列化时使用字段名而不是别名
         by_alias = False
+        # 自定义 datetime 序列化为东八区时间
+        json_encoders = {
+            datetime: datetime_to_local_str
+        }
 
 
 class InvoiceListResponse(BaseModel):

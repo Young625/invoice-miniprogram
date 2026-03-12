@@ -108,7 +108,7 @@ Page({
   // 加载最近发票
   async loadRecentInvoices() {
     const res = await app.request({
-      url: '/invoices?page=1&page_size=5',
+      url: '/invoices?page=1&page_size=20',
       method: 'GET'
     })
     return res.items || []
@@ -155,31 +155,60 @@ Page({
       return
     }
 
-    wx.showLoading({
-      title: '同步中...'
-    })
+    wx.showLoading({ title: '同步中...' })
 
     try {
-      await app.request({
+      const result = await app.request({
         url: '/invoices/sync',
         method: 'POST'
       })
 
       wx.hideLoading()
-      wx.showToast({
-        title: '同步成功',
-        icon: 'success'
-      })
+
+      const successCount = result.success_count || 0
+      const duplicateCount = result.duplicate_count || 0
+      const duplicateInvoices = result.duplicate_invoices || []
+
+      // 构建提示消息
+      let message = result.message || '同步完成'
+
+      // 如果有重复发票，显示详细信息
+      if (duplicateCount > 0 && duplicateInvoices.length > 0) {
+        const duplicateDetails = duplicateInvoices.map(inv =>
+          `发票号码：${inv.invoice_number}\n原因：${inv.reason}`
+        ).join('\n\n')
+
+        wx.showModal({
+          title: '同步完成',
+          content: `${message}\n\n重复发票详情：\n${duplicateDetails}`,
+          showCancel: false,
+          confirmText: '我知道了'
+        })
+      } else if (successCount > 0) {
+        wx.showToast({
+          title: message,
+          icon: 'success',
+          duration: 2000
+        })
+      } else {
+        wx.showToast({
+          title: message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
 
       // 重新加载数据
       setTimeout(() => {
         this.loadData()
       }, 1500)
     } catch (err) {
+      console.error('同步失败:', err)
       wx.hideLoading()
       wx.showToast({
-        title: '同步失败',
-        icon: 'none'
+        title: err.data?.detail || err.message || '同步失败',
+        icon: 'none',
+        duration: 2000
       })
     }
   },
