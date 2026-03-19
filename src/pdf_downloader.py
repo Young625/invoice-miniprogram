@@ -212,8 +212,16 @@ def extract_pdfs_from_urls(
     for url in urls:
         pdf_data = download_pdf_from_url(url, timeout=timeout)
         if pdf_data:
-            # 使用 URL 作为文件名（简化处理）
-            filename = url.split('/')[-1] or 'downloaded.pdf'
+            # 从 URL 中提取文件名，去除查询参数和非法字符
+            from urllib.parse import urlparse, unquote
+
+            parsed_url = urlparse(url)
+            # 从路径中提取文件名（不包含查询参数）
+            filename = parsed_url.path.split('/')[-1] or 'downloaded.pdf'
+            # 解码 URL 编码（如 %20 -> 空格）
+            filename = unquote(filename)
+            # 移除文件名中的非法字符（Windows: <>:"/\|?*）
+            filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
             # 确保文件名以 .pdf 结尾
             if not filename.lower().endswith('.pdf'):
                 filename += '.pdf'

@@ -68,6 +68,8 @@ class CompressedTimedRotatingFileHandler(TimedRotatingFileHandler):
         4. 删除原始文件
         5. 打开新文件
         """
+        import time
+
         if self.stream:
             self.stream.close()
             self.stream = None
@@ -86,6 +88,11 @@ class CompressedTimedRotatingFileHandler(TimedRotatingFileHandler):
 
         # 目标文件路径 (带日期的日志文件)
         target_file = os.path.join(month_dir, f'{self.filename_prefix}-{date_str}.0.log')
+
+        # ★ 关键修复：必须在任何 logging 调用之前更新 rolloverAt 和 baseFilename，
+        #   否则 logging.info() 会再次触发 shouldRollover() → doRollover() 连锁反应
+        self.rolloverAt = self.computeRollover(int(time.time()))
+        self.baseFilename = self._get_current_log_path()
 
         # 如果源文件存在且有内容,进行轮转
         if os.path.exists(source_file) and os.path.getsize(source_file) > 0:
@@ -106,9 +113,6 @@ class CompressedTimedRotatingFileHandler(TimedRotatingFileHandler):
                 logging.info(f'日志已轮转并压缩: {zip_file}')
             except Exception as e:
                 logging.error(f'压缩日志文件失败: {e}')
-
-        # 更新当前日志文件路径
-        self.baseFilename = self._get_current_log_path()
 
         # 打开新的日志文件
         if not self.delay:
