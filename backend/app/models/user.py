@@ -35,6 +35,7 @@ class EmailConfig(BaseModel):
     auth_code: str  # 授权码
     folder: str = "INBOX"
     email_type: Optional[str] = None  # 邮箱类型：qq, 163, 126, gmail, outlook, custom
+    last_sync_date: Optional[datetime] = None  # 上次同步游标（该邮箱最后一封被检查邮件的 INTERNALDATE UTC）
 
 
 class User(BaseModel):

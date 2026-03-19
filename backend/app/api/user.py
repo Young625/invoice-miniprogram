@@ -1,5 +1,5 @@
 """用户相关 API"""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import datetime
 import logging
@@ -67,13 +67,14 @@ async def get_email_configs(
 @router.post("/email-configs")
 async def add_email_config(
     config: EmailConfig,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     """
     添加新邮箱配置
 
-    最多支持 3 个邮箱配置
+    最多支持 3 个邮箱配置。添加成功后立即在后台触发一次首次同步。
     """
     logger.info(f"用户 {current_user.openid} 尝试添加邮箱: {config.username}")
 
@@ -128,6 +129,21 @@ async def add_email_config(
     )
 
     logger.info(f"用户 {current_user.openid} 邮箱配置添加成功")
+
+    # 绑定成功后立即触发首次同步（后台非阻塞执行）
+    async def _run_initial_sync():
+        try:
+            from ..services.email_service import EmailService
+            email_service = EmailService(db)
+            fresh_user_data = await db.users.find_one({"openid": current_user.openid})
+            if fresh_user_data:
+                fresh_user = User(**fresh_user_data)
+                await email_service.process_user_emails(fresh_user)
+                logger.info(f"邮箱 {config.username} 首次同步完成")
+        except Exception as e:
+            logger.error(f"邮箱 {config.username} 首次同步失败: {e}", exc_info=True)
+
+    background_tasks.add_task(_run_initial_sync)
 
     return {"message": "邮箱配置添加成功", "index": len(email_configs)}
 
@@ -184,12 +200,17 @@ async def update_email_config(
     await asyncio.get_event_loop().run_in_executor(None, _verify_imap_connection, config)
     logger.info(f"邮箱 {config.username} IMAP 验证通过")
 
-    # 更新邮箱配置
+    # 更新邮箱配置（保留旧的 last_sync_date，避免重置同步游标）
+    new_config_dict = config.model_dump()
+    old_last_sync_date = email_configs[index].get("last_sync_date")
+    if old_last_sync_date and not new_config_dict.get("last_sync_date"):
+        new_config_dict["last_sync_date"] = old_last_sync_date
+
     result = await db.users.update_one(
         {"openid": current_user.openid},
         {
             "$set": {
-                f"email_configs.{index}": config.model_dump(),
+                f"email_configs.{index}": new_config_dict,
                 "updated_at": datetime.utcnow()
             }
         }

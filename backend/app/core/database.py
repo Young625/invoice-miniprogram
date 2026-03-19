@@ -45,6 +45,20 @@ class Database:
             else:
                 print(f"⚠️  创建索引时出错: {e}")
 
+        # 创建已处理邮件记录索引（防止重复处理同一封邮件）
+        try:
+            await db.processed_emails.create_index(
+                [("user_id", 1), ("email_account", 1), ("email_uid", 1)],
+                unique=True,
+                name="processed_email_uid_index"
+            )
+            print("✅ 已创建已处理邮件索引")
+        except Exception as e:
+            if "already exists" in str(e):
+                print("⚠️  已处理邮件索引已存在")
+            else:
+                print(f"⚠️  创建已处理邮件索引时出错: {e}")
+
     @classmethod
     async def close_db(cls):
         """关闭数据库连接"""

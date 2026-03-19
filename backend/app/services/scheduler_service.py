@@ -27,10 +27,10 @@ class SchedulerService:
         db = Database.get_db()
         self.email_service = EmailService(db)
 
-        # 添加邮箱轮询任务（每 5 分钟）
+        # 添加邮箱轮询任务（每 10 分钟）
         self.scheduler.add_job(
             self.poll_emails,
-            trigger=IntervalTrigger(minutes=5),
+            trigger=IntervalTrigger(minutes=10),
             id='poll_emails',
             name='邮箱轮询任务',
             replace_existing=True
@@ -39,9 +39,6 @@ class SchedulerService:
         # 启动调度器
         self.scheduler.start()
         logger.info("定时任务服务已启动")
-
-        # 在后台立即执行一次（不阻塞启动）
-        asyncio.create_task(self.poll_emails())
 
     async def stop(self):
         """停止定时任务"""

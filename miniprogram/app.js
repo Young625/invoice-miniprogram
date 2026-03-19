@@ -4,10 +4,10 @@ App({
     userInfo: null,
     token: null,
     // 线上
-    apiBase: 'https://invoice.zjugpt.com/api',
+    //apiBase: 'https://invoice.zjugpt.com/api',
 
     // 开发
-    // apiBase: 'http://192.168.0.17:8000/api',
+     apiBase: 'http://192.168.0.17:8000/api',
 
     // 版本号（每次发版时更新）
     version: '2.0.5',
@@ -117,6 +117,7 @@ App({
         url: this.globalData.apiBase + options.url,
         method: options.method || 'GET',
         data: options.data || {},
+        timeout: 120000,
         header: {
           'Content-Type': 'application/json',
           'Authorization': this.globalData.token ? `Bearer ${this.globalData.token}` : ''

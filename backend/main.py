@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
 
     # 启动定时任务
     await scheduler_service.start()
-    print("⏰ 邮箱监控服务已启动（每 5 分钟检查一次）")
+    print("⏰ 邮箱监控服务已启动（每 10 分钟检查一次）")
 
     yield
 
