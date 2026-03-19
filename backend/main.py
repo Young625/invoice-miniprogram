@@ -86,5 +86,6 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=8000,
-        reload=settings.DEBUG
+        reload=settings.DEBUG,
+        log_config=None,   # 不覆盖 Python logging，uvicorn 日志走我们的轮转处理器
     )

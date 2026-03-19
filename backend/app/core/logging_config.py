@@ -74,8 +74,9 @@ class CompressedTimedRotatingFileHandler(TimedRotatingFileHandler):
             self.stream.close()
             self.stream = None
 
-        # 获取昨天的日期 (因为是在午夜轮转,此时轮转的是昨天的日志)
-        yesterday = datetime.now()
+        # 获取昨天的日期（轮转在午夜触发，此时 now() 已是新的一天，减1秒得到昨天）
+        from datetime import timedelta
+        yesterday = datetime.now() - timedelta(seconds=1)
         date_str = yesterday.strftime('%Y-%m-%d')
         year_month = yesterday.strftime('%Y-%m')
 
