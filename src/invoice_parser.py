@@ -48,7 +48,7 @@ class InvoiceInfo:
     amount: str = ""             # 金额（不含税）
     tax_amount: str = ""         # 税额
     tax_rate: str = ""           # 税率（如：6%、9%、13%、免税）
-    total_amount: str = ""       # 价税合计
+    total_amount: str = ""       # 价税合计（铁路发票的退票费/改签费也存在此字段）
 
     # 商品信息
     items: List[str] = field(default_factory=list)  # 商品/服务名称列表
@@ -646,19 +646,45 @@ class RailwayTicketStrategy(BaseInvoiceStrategy):
 
     差异点：
     - 无"价税合计"字段，用"票价"字段作为发票金额
+    - 支持退票费和改签费识别（也存入 total_amount）
     - 税率固定 9%，PDF 上不显示
     - 购买方格式为单行 "购买方名称:xxx 统一社会信用代码:yyy"
     - items 留空（铁路客票无商品明细）
     """
 
     def parse_amounts(self, text: str, tables: list, info: InvoiceInfo):
-        """铁路客票金额提取：用票价替代价税合计，税率固定9%。"""
-        # 策略1：票价: ¥409.00 或 票价：409.00
-        m = re.search(r"票\s*价[：:\s]*[¥￥]\s*([\d,]+\.\d{2})", text)
+        """铁路客票金额提取：识别票价/退票费/改签费，统一存入 total_amount。
+
+        铁路发票格式统一为：
+        ￥90.00
+        退票费:
+        """
+        # 统一的金额识别模式：¥金额\n标签（金额在标签之前）
+        # 按优先级匹配：退票费 > 改签费 > 票价
+
+        # 策略1：退票费识别（优先级最高）
+        m = re.search(r"[¥￥]\s*([\d,]+\.\d{2})\s*\n\s*退\s*票\s*费", text)
         if m:
             info.total_amount = float(m.group(1).replace(",", ""))
-        # 策略2：乱序情况 — 文本含"票价"，且有独立的 ¥金额行
-        elif re.search(r"票\s*价", text):
+            info.tax_rate = "9"
+            return
+
+        # 策略2：改签费识别
+        m = re.search(r"[¥￥]\s*([\d,]+\.\d{2})\s*\n\s*改\s*签\s*费", text)
+        if m:
+            info.total_amount = float(m.group(1).replace(",", ""))
+            info.tax_rate = "9"
+            return
+
+        # 策略3：票价识别（正常购票）
+        m = re.search(r"[¥￥]\s*([\d,]+\.\d{2})\s*\n\s*票\s*价", text)
+        if m:
+            info.total_amount = float(m.group(1).replace(",", ""))
+            info.tax_rate = "9"
+            return
+
+        # 兜底策略：如果文本中包含"票价"/"退票费"/"改签费"关键词，提取第一个金额
+        if re.search(r"票\s*价|退\s*票\s*费|改\s*签\s*费", text):
             m = re.search(r"[¥￥]\s*([\d,]+\.\d{2})", text)
             if m:
                 info.total_amount = float(m.group(1).replace(",", ""))
